@@ -1,0 +1,128 @@
+.content {
+  padding:10px;
+  overflow-x:hidden;
+  overflow-y: auto;
+}
+.content-minor {
+  padding:5px;
+  margin:1px;
+}
+.box {
+  border: 1px solid black; 
+}
+.bar-bottom {
+  border-bottom: 2px solid black; 
+} 
+.font-lg {
+  font-size: 120%;
+}
+.margin-full {
+  margin: 5px;
+}
+.top-pad {
+  margin-top: 5px;
+}
+.bottom-pad {
+  margin-bottom: 5px;
+}
+.inline {
+  display: inline;
+}
+.center {
+  text-align: center;
+}
+.left {
+  text-align: left;
+}
+.hidden {
+  display:none;
+}
+.top{
+  position: absolute;
+  top:0;
+}
+.vcenter {
+  vertical-align: middle;
+}
+[v-cloak] {
+  display: none;
+}
+.strong{
+  font-weight:600;
+}
+.innerLink {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.pad-y {
+  margin: 0 2px;
+}
+.input-slim{
+  width: 55px;
+}
+.input-mid{
+  width: 85px;
+}
+/* ==========================================================================
+Maps
+========================================================================== */
+#maps {
+  position:fixed;
+  top:15px;
+  bottom:20px;
+  left:1%;
+  right:1%;
+  overflow:auto;
+}
+#maps canvas {
+  display: block;
+  margin: auto;
+}
+/* ==========================================================================
+Windows
+========================================================================== */
+.window{
+  position: fixed;
+  max-height:98%;
+  left: 50%;
+  width: 100%;
+  transform: translate(-50%, 0%);
+  background-color: whitesmoke;
+  overflow-y:auto;
+}
+@media only screen and (min-width: 425px) {
+  .window.slim{
+    width: 400px;
+  }
+}
+@media only screen and (min-width: 820px) {
+  .window.wide{
+    width: 800px;
+  }
+}
+.notify{
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: whitesmoke;
+  border: 1px solid black; 
+  overflow-y:auto;
+}
+.notify .content {
+  max-height: 400px;
+}
+.header{
+  margin:0px;
+  padding: 5px 10px;
+  background: silver;
+  border: none;
+  border-bottom-style: groove;
+}
+/* ==========================================================================
+Unique
+========================================================================== */
+.pwd-area.explored {
+  background-color: rgba(0,128,0,0.5);
+}

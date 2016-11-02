@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <title>Cosmic Power Utilities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="src/lib/jquery-1.11.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
+  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+  <link rel="stylesheet" type="text/css" href="src/slider.css">
+  <link rel="stylesheet" type="text/css" href="src/main.css">
+
+</head>
+
+<body>
+  <div class="window" v-bind:class="width" id="cpxpage" v-show="show" v-cloak>
+    <component v-bind:is="currentView"></component>
+  </div>
+  <div id="mainmenu" class="window slim" v-show="show" v-cloak>
+    <h3 class="header center">Main Menu</h3>
+    <div class="content">
+      <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generator</button>
+      <button v-on:click="PWDGen" type="button" class="btn btn-info btn-lg btn-block">Perilous Wilds Dungeon Generator</button>
+      <button v-on:click="PandCGen" type="button" class="btn btn-info btn-lg btn-block">People/Creature Generator</button>
+      <button v-on:click="CephGen" type="button" class="btn btn-info btn-lg btn-block">Cepheus RPG System Generator</button>
+      <button v-on:click="About" type="button" class="btn btn-info btn-lg btn-block">About the Program</button>
+      <button v-on:click="clearAllData" type="button" class="btn btn-info btn-lg btn-block">Clear All Data</button>
+    </div>
+  </div>
+  <div class="notify" id="mainNotify" v-show="show" v-cloak>
+    <h3 class="header center">{{header}}</h3>
+    <div class="content">{{{content}}}</div>
+    <component v-bind:is="currentView"></component>
+    <div v-show="showclose" class="center">
+      <button v-on:click="close" type="button" class="btn btn-info">Close</button>
+    </div>
+  </div>
+  <div id="logo" ></div>
+  <div class="hidden">
+    <template id="about">
+      <h3 class="center header">Cosmic Power Utilities</h3>
+      <div class="content">
+        <div class="center">
+          All the code to this is released open source under the </br>GNU General Public License v3.0.
+          <p class="strong"><em>This is free because the grace of God is free through His son Jesus.</em></p>
+        </div>
+        <p>This app was meant to help you with all your cosmic adventures.  
+        It is web based, but we are working on an offline version.  
+        It has a minimal design, and should work just as well on phones and tablets.
+        </p>
+        <p>You can save anything you create – and it will be saved locally to your device.  
+        When you come back you can load what you saved.  If you clear your history or cache for 
+        this page you will delete this data (so beware).
+        </p>
+        <strong>Current Utilities:</strong>
+        <ul>
+          <li><strong>Fantasy Plot Generator</strong>
+          <p>A random plot generator that creates a number of story prompts.  
+          It is built on a central villain and plot that takes place over a three adventure arc.  
+          Each adventure has its own villain, plot, location and factions – all randomly generated.
+          A JTeam original. 
+          </p>
+          </li>
+          <li><strong><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+            Perilous Wilds</a> Dungeon Generator</strong>
+            <p>Generates a dungeon filled with a random number of areas.    
+            Areas may have themes, features, creatures, traps and/or loot.
+            There are no grids here - pure theater of the mind.  
+            <p>
+          </li>
+          <li><strong>People/Creature Generator</strong>
+          <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
+          No statistics are provided, but most will have special ability "tags" to make them unique. 
+          </p>
+          </li>
+          <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            Cepheus RPG</a> Star System Generator</strong>
+            <p>Generates a random star system based upon tables found in the SRD.</p>
+          </li>
+        </ul>
+        <strong>This utility relies on the following sources:</strong> 
+        <ul>
+          <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
+            <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
+          licensed under a Creative Commons Attribution 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+            <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
+          from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            <em>Cepheus Engine System Reference Document</em></a>, 
+          by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+        </ul>
+        <div>We hope you enjoy! <p>The JTeam</p></div>
+      </div>
+      <button v-on:click="close" type="button" class="btn btn-info btn-lg btn-block">Close</button>
+    </template>
+    <template id="OGL">
+      <h3 class="center header">OPEN  GAME LICENSE Version 1.0a</h3>
+      <p>The  following text is the property of Wizards of the Coast, Inc. and is  Copyright 2000 Wizards of the Coast, Inc (‘Wizards’). All Rights  Reserved.</p>
+      <p>1.  Definitions: (a)’Contributors’ means the copyright and/or  trademark owners who have contributed Open Game Content;  (b)’Derivative Material’ means copyrighted material including  derivative works and translations (including into other computer  languages), potation, modification, correction, addition, extension,  upgrade, improvement, compilation, abridgment or other form in which  an existing work may be recast, transformed or adapted; (c)  ‘Distribute’ means to reproduce, license, rent, lease, sell,  broadcast, publicly display, transmit or otherwise distribute;  (d)’Open Game Content’ means the game mechanic and includes the  methods, procedures, processes and routines to the extent such  content does not embody the Product Identity and is an enhancement  over the prior art and any additional content clearly identified as  Open Game Content by the Contributor, and means any work covered by  this License, including translations and derivative works under  copyright law, but specifically excludes Product Identity. (e)  ‘Product Identity’ means product and product line names, logos  and identifying marks including trade dress; artifacts; creatures  characters; stories, storylines, plots, thematic elements, dialogue,  incidents, language, artwork, symbols, designs, depictions,  likenesses, formats, poses, concepts, themes and graphic,  photographic and other visual or audio representations; names and  descriptions of characters, spells, enchantments, personalities,  teams, personas, likenesses and special abilities; places, locations,  environments, creatures, equipment, magical or supernatural abilities  or effects, logos, symbols, or graphic designs; and any other  trademark or registered trademark clearly identified as Product  identity by the owner of the Product Identity, and which specifically  excludes the Open Game Content; (f) ‘Trademark’ means the logos,  names, mark, sign, motto, designs that are used by a Contributor to  identify itself or its products or the associated products  contributed to the Open Game License by the Contributor (g) ‘Use’,  ‘Used’ or ‘Using’ means to use, Distribute, copy, edit,  format, modify, translate and otherwise create Derivative Material of  Open Game Content. (h) ‘You’ or ‘Your’ means the licensee in  terms of this agreement.</p>
+      <p>2.  The License: This License applies to any Open Game Content that  contains a notice indicating that the Open Game Content may only be  Used under and in terms of this License. You must affix such a notice  to any Open Game Content that you Use. No terms may be added to or  subtracted from this License except as described by the License  itself. No other terms or conditions may be applied to any Open Game  Content distributed using this License.</p>
+      <p>3.  Offer and Acceptance: By Using the Open Game Content You indicate  Your acceptance of the terms of this License.</p>
+      <p>4.  Grant and Consideration: In consideration for agreeing to use this  License, the Contributors grant You a perpetual, worldwide,  royalty-free, non-exclusive license with the exact terms of this  License to Use, the Open Game Content.</p>
+      <p>5.Representation  of Authority to Contribute: If You are contributing original material  as Open Game Content, You represent that Your Contributions are Your  original creation and/or You have sufficient rights to grant the  rights conveyed by this License.</p>
+      <p>6.Notice  of License Copyright: You must update the COPYRIGHT NOTICE portion of  this License to include the exact text of the COPYRIGHT NOTICE of any  Open Game Content You are copying, modifying or distributing, and You  must add the title, the copyright date, and the copyright holder’s  name to the COPYRIGHT NOTICE of any original Open Game Content you  Distribute.</p>
+      <p>7.  Use of Product Identity: You agree not to Use any Product Identity,  including as an indication as to compatibility, except as expressly  licensed in another, independent Agreement with the owner of each  element of that Product Identity. You agree not to indicate  compatibility or co-adaptability with any Trademark or Registered  Trademark in conjunction with a work containing Open Game Content  except as expressly licensed in another, independent Agreement with  the owner of such Trademark or Registered Trademark. The use of any  Product Identity in Open Game Content does not constitute a challenge  to the ownership of that Product Identity. The owner of any Product  Identity used in Open Game Content shall retain all rights, title and  interest in and to that Product Identity.</p>
+      <p>8.  Identification: If you distribute Open Game Content You must clearly  indicate which portions of the work that you are distributing are  Open Game Content.</p>
+      <p>9.  Updating the License: Wizards or its designated Agents may publish  updated versions of this License. You may use any authorised version  of this License to copy, modify and distribute any Open Game Content  originally distributed under any version of this License.</p>
+      <p>10.  Copy of this License: You MUST include a copy of this License with  every copy of the Open Game Content You Distribute.</p>
+      <p>11.  Use of Contributor Credits: You may not market or advertise the Open  Game Content using the name of any Contributor unless You have  written permission from the Contributor to do so.</p>
+      <p>12.  Inability to Comply: If it is impossible for You to comply with any  of the terms of this License with respect to some or all of the Open  Game Content due to statute, judicial order, or governmental  regulation then You may not Use any Open Game Material so affected.</p>
+      <p>13.  Termination: This License will terminate automatically if You fail to  comply with all terms herein and fail to cure such breach within 30  days of becoming aware of the breach. All sublicenses shall survive  the termination of this License.</p>
+      <p>14.  Reformation: If any provision of this License is held to be  unenforceable, such provision shall be reformed only to the extent  necessary to make it enforceable.</p>
+      <p>15.  COPYRIGHT NOTICE</p>
+      <p>Open  Game License v 1.0a Copyright 2000, Wizards of the Coast, Inc.</p>
+      <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p><p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
+      <p>High  Guard System Reference Document Copyright © 2008, Mongoose  Publishing.</p>
+      <p>Traveller is © 2008 Mongoose  Publishing. Traveller and related logos, character, names, and  distinctive likenesses thereof are trademarks of Far Future  Enterprises unless otherwise noted. All Rights Reserved. Mongoose  Publishing Ltd Authorized User.</p><p>Vehicle Handbook System Reference Document Copyright © 2012, Mongoose Publishing.</p>
+      <button v-on:click="close" type="button" class="btn btn-info btn-lg btn-block">Close</button>
+    </template>
+  </div>
+</body>
+
+  <script type="text/javascript" src="src/lib/vue.js"></script>
+  <script type="text/javascript" src="src/lib/localforage.min.js"></script>
+  <script type="text/javascript" src="src/lib/jquery.noty.packaged.min.js"></script>
+  <script type="text/javascript" src="src/lib/chance.min.js"></script>
+  <script type="text/javascript" src="src/app.js"></script>
+  <script type="text/javascript" src="src/encounters.js"></script>
+  <script type="text/javascript" src="src/starsystem.js"></script>
+  <script type="text/javascript" src="src/mainmenu.js"></script>
+  <script type="text/javascript" src="src/notify.js"></script>
+  <script type="text/javascript" src="src/page.js"></script>
+  <script type="text/javascript" src="src/fantasyplot.js"></script>
+  <script type="text/javascript" src="src/cepheussystem.js"></script>
+  <script type="text/javascript" src="src/pwdungeon.js"></script>
+  <script type="text/javascript" src="src/pandcgen.js"></script>
+  <script type="text/javascript" src="src/start.js"></script>
+
+</html>

@@ -1,0 +1,16 @@
+info.svg, exit-door.svg, plain-arrow.svg
+Creative Commons (Attribution 3.0 Unported)
+By Delapouite - http://delapouite.com/
+http://game-icons.net/delapouite/originals/info.html
+http://game-icons.net/delapouite/originals/exit-door.html
+http://game-icons.net/delapouite/gui/plain-arrow.html
+
+impact-point.svg
+Creative Commons (Attribution 3.0 Unported)
+By Lorc - http://lorcblog.blogspot.com/
+http://game-icons.net/lorc/originals/impact-point.html
+
+menu-icon.svg
+Creative Commons (Attribution-Share Alike 3.0 Unported)
+By Timothy Miller - https://www.iconfinder.com/tmthymllr
+https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon
