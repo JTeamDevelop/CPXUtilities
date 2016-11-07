@@ -116,6 +116,10 @@ CPX.creature.standard = function (RNG,creature){
 
   creature.nappearing = RNG.weighted(SPECIALNATURE.nappearing,[0.3,0.5,0.2]);
   creature.nature = RNG.pickone(SPECIALNATURE.nature);
+  
+  //reduce duplicates
+  creature.class = creature.class.unique();
+  creature.special = creature.special.unique();
 }
 CPX.creature.constructor = function (nature,RNG,strtest,terrain,rank) {
   var R = {special:[],class:[]}, OBJ={}, etext ="", temp = "";
@@ -379,6 +383,10 @@ CPX.people = function (RNG,opts) {
   people.rank = rank;
   people.nappearing = RNG.weighted(SPECIALNATURE.nappearing,[0.3,0.5,0.2]);
   people.nature = RNG.pickone(SPECIALNATURE.nature);
+  
+  //reduce duplicates
+  people.class = people.class.unique();
+  people.special = people.special.unique();
 
   return people;
 }

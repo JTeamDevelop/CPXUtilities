@@ -12,13 +12,13 @@ Vue.component('c-pnc-result', {
   </div>\
   <div class="content">\
   <div v-if="object.class.length>1"><strong>Nature: </strong>{{nature | capitalize}}</div>\
-  <div v-if="object.special.length>0"><strong>Tags:</strong> {{object.special.join(", ") | capitalize}}</div>\
+  <div v-if="object.special.length>0"><strong>Tags:</strong> {{object.special.unique().join(", ") | capitalize}}</div>\
   <button v-on:click="save" type="button" class="btn btn-info btn-block">Save</button>\
   </div></div>\
   ',
   computed: {
     nature: function(){
-      return this.object.class.slice(1).join(", ");
+      return this.object.class.slice(1).unique().join(", ");
     }
   },
   methods:{
@@ -29,7 +29,7 @@ Vue.component('c-pnc-result', {
       }
     },
     remove: function(){
-      HUB.$emit('CPC-remove',this.idx)
+      HUB.$emit('CPC-remove',this.idx);
     }
   }
 })

@@ -180,7 +180,7 @@ Vue.component('c-villain', {
 Vue.component('c-factions', { 
   props: ['factions'],
   template: '<div><strong>Main Factions:</strong><ul><li v-for="f in factions"><div><strong>{{f.name}} {{f.profession}}</strong> who {{f.desire}}</div>' +
-            '<div v-if="f.special.length>0"><strong>Tags:</strong> {{f.special.join(`, `) | capitalize }}</div></li></ul></div>' 
+            '<div v-if="f.special.length>0"><strong>Tags:</strong> {{f.special.unique().join(`, `) | capitalize }}</div></li></ul></div>' 
 })
 //Standard adventure dipplay
 Vue.component('c-adventure', {

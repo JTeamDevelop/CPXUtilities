@@ -1,5 +1,5 @@
 //core object for Cosmic Power utilities
-var CPX = {
+const CPX = {
   display:{},
   gen:{},
   user:{},
@@ -7,7 +7,9 @@ var CPX = {
   realm:{}
 };
 //Save db for Indexed DB - localforage
-var CPXSAVE = localforage.createInstance({ name: "CPXSave", storeName: "CPXsave" });
+const CPXSAVE = localforage.createInstance({ name: "CPXSave", storeName: "CPXsave" });
+//local save for quick reference - used for maps
+const CPXDB = {};
 //Object declaration for the global Random NUmber generator - to be populated later
 var CPXC;
 //Base character list for UID determination

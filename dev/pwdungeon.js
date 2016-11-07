@@ -158,7 +158,7 @@ Vue.component('c-pwd-encounter', {
   template: '\
   <div class="box bottom-pad">\
   <div><strong>Encounter: </strong>{{object.name | capitalize}}</div>\
-  <div v-if="object.special.length>0"><strong>Tags:</strong> {{object.special.join(", ") | capitalize}}</div>\
+  <div v-if="object.special.length>0"><strong>Tags:</strong> {{object.special.unique().join(", ") | capitalize}}</div>\
   </div>\
   '
 })

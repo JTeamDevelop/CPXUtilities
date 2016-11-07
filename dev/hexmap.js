@@ -30,31 +30,26 @@ CPX.mapDimensions = function () {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.hexMap = function (opts) {
   var map = {
-    _type : "hexMap",
     _dtype : "zones",
     _radial : false,
+    _pointy : typeof opts.pointy === "undefined" ? true : opts.pointy,
     _hexradius : 35,
-    _loadComplete: false,
     seed : typeof opts.seed === "undefined" ? [CPXC.string({length: 32, pool: base62})] : opts.seed,
     cells : {},
     zones : [],
-    units : [],
     mods : {}
   }
 
+  //id based on the seed
   map._id = map.seed.join("");
+  //parent if contained in another object
   map.parent = typeof opts.parent === "undefined" ? "" : opts.parent;
-  map.class = typeof opts.class === "undefined" ? [] : opts.class;
-
+  //classes of the map
+  map.class = typeof opts.class === "undefined" ? ['hexMap'] : opts.class;
   map.special = typeof opts.special === "undefined" ? [] : opts.special;
-
-  map._pointy = typeof opts.pointy === "undefined" ? true : opts.pointy;
-
-  map._scale = typeof opts.scale === "undefined" ? 1 : opts.scale;
-  map._minScale = typeof opts.minScale === "undefined" ? 1 : opts.minScale;
-  map._dscale = map._minScale;
-
+  //number of cell zones
   map._nZones = typeof opts.nZones === "undefined" ? -1 : opts.nZones;
+  //optionally a number of cells
   map._nCells = typeof opts.nCells === "undefined" ? 0 : opts.nCells;
   //uniform distribution of planes = no zones used
   var uniform = typeof opts.uniform === "undefined" ? false : opts.uniform;
@@ -64,19 +59,12 @@ CPX.hexMap = function (opts) {
 
   map._parentNeighboors = typeof opts.parentNeighboors === "undefined" ? [] : opts.parentNeighboors;
 
-  //since we are passing an array use the ES6 spread(...) command
+  //start the seeded RNG
   map.RNG = new Chance(map.seed.join(""));
-  map.realm = typeof opts.realm === "undefined" ? map.seed[0] : opts.realm;
+  
   map._size = typeof opts.size === "undefined" ? CPX.size(map.RNG)/2 : opts.size;
 
-  if(map._nZones == -1  && !uniform){
-    map._nZones = Math.round(Math.pow(10,map._scale-map._dscale)*map._size);
-
-    for (var i = 0; i < map._nZones; i++) {
-      CPX.hexMap.addZone(map);
-    }
-  }
-
+  //Uniform distribution of cells in one zone
   if(uniform) {
     //if uniform a number of cells has to be provided
     if(map._nCells == 0){
@@ -92,64 +80,78 @@ CPX.hexMap = function (opts) {
       CPX.hexMap.addCell(map);
     }
   }
-
-  if(map.realm == map._id){
-    CPXDB[map._id] = map;
-    map.time = 0;
-    map.opts = opts;
-    map.mods = new Nedb();
-    map.mods.persistence.setAutocompactionInterval(120000);
-    CPX.save.realm(map);
+  else {
+    //if it isn't a uniform map and there are no defined zones - randomly create a number of zones
+    if(map._nZones == -1){
+      map._nZones = Math.round(10*map._size);
+    }
+    //generate the zones
+    for (var i = 0; i < map._nZones; i++) {
+      CPX.hexMap.addZone(map);
+    }
   }
 
-  CPX.hexMap.applyMods(map);
+  //make zones visible
   CPX.hexMap.makeVisible(map);
-  CPX.hexMap.zoneGates(map);
-  CPX.hexMap.zoneNeighboors(map);
-  CPX.hexMap.populations(map);
 
+  //null and delete RNG for cleanup
+  map.RNG = null;
   delete map.RNG;
   
+  //identify neighboors and bounds for display
+  CPX.hexMap.zoneNeighboors(map);
   CPX.hexMap.bounds(map);
 
-  if(objExists(opts.dataOnly)){
-    return map;
-  }
-
-  CPXDB[map._id] = map;
+  //save the options provided
+  map.opts = opts;
+  //setup the NEDB to hold the mods
+  map.mods = new Nedb();
+  map.mods.persistence.setAutocompactionInterval(120000);
   
-  return map._id;
-
+  return map;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.hexMap.save = function (map,options) {
-  var data = {
-    seed: map.seed,
-    type: "hexMap",
-    mods: map.mods,
-    options: options,
-    realm: map.realm
+//push to mod DB, mod {query,type,data}
+CPX.hexMap.pushMod = function (map,mod) {
+  //pass data to mod db
+  if(mod.type=='set'){
+    map.mods.update(mod.query, { $set: mod.data }, { upsert: true }, function () {}); 
   }
-  localStorage.setItem(map._id,JSON.stringify(data));
+  else if(mod.type=='addtoset'){
+    map.mods.update(mod.query, { $addToSet: mod.data }, { upsert: true }, function () {}); 
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.hexMap.save = function (map) {
+  var data = {
+    _id: map._id,
+    seed: map.seed,
+    mods: map.mods,
+    opts: map.opts
+  }
+  CPXSAVE.setItem(map._id,data);
 }
 CPX.hexMap.applyMods = function (map) {
+  var mods = map.opts.mods;
   //return promise
   return new Promise(function(resolve,reject){
-    //pull mods and update
-    CPX.mod.find(map).then(function(mods){
-      for(var x in mods){
-        if(x=='_id'){continue;}
-        map[x] = mods[x];
-      }  
+    //update mod db accordingly
+    map.mods.insert([mods], function (err) {});
+    //pull mods and loop through
+    mods.forEach(function(el) {
+      //if the id is a cell id - loop through
+      if(objExists(map.cells[el._id])){
+        //loop through keys and mod cell
+        for(var x in el){
+          if(x=='_id'){continue;}
+          map.cells[el._id][x] = el[x];
+        }
+      }
+      else {
+        map[el._id] = el.val;
+      }
     })
-    //pull visible
-    map.visible = [];
-    CPX.user.visible(map).then(function(visible){
-      map.visible = visible;
-      if(visible.length>0) { CPX.display.drawHex(map); }
-      map._loadComplete = true;
-      resolve(true);
-    })  
+    resolve(map);
   });
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,109 +349,6 @@ CPX.hexMap.zoneNeighboors = function (map) {
   return ZN;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Gates to other parent neighboors
-CPX.hexMap.zoneGates = function (map) {
-  var zone = {}
-  map._parentNeighboors.forEach(function (pN) {
-    zone = map.RNG.pickone(map.zones);
-    if(objExists(zone.gate)) {
-      zone.gate.push(pN);
-    }
-    else {
-      zone.gate = [pN];
-    }
-  })
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.hexMap.populations = function (map) {
-  var zid=-1;
-  
-  map.disarmed = [];
-  map.cleared = [];
-  map.looted = [];
-
-  map.special.forEach(function(S){
-    if(S.class.includes('lair')) { 
-      S.cleared = false;
-      zid = map.RNG.pickone(map.zones).id;
-      map.zones[zid].special.push(S);
-      map.zones[zid].class.push('lair');
-    }
-  });
-  map.zones.forEach(function(Z){
-    CPX.explore(map.RNG,Z);
-  })
-  
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.hexMap.encounter = function (map,zone) { 
-  var pop = [], prob=[], modobj = CPXDB[map.seed[0]].mods[map.seed.slice(1).join("")], mod={};
-
-  map.special.forEach(function(S){
-    if(S.type=="pop") { 
-      pop.push(S);
-      prob.push(S.n);       
-    }
-  });
-  //if there is a pop to pull from randomly determine the encounter based upon total population
-  if(pop.length != 0 || prob.reduce( ( acc, cur ) => acc + cur, 0 ) != 0 ) {
-    CPX.fight.build([map,zone],CPXC.weighted(pop,prob));
-  }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.hexMap.display = function (opts) {
-  //make the canvas
-  CPX.display.makeCanvas(opts.map,CPX.display.hexMap);
-  if(opts.map._loadComplete){ 
-    //enter the first zone --wait until mods have been loaded
-    CPX.hexMap.enterZone(opts.map,opts.map.zones[opts.map._zoneEnter]);
-  }
-  else {
-    CPX.hexMap.applyMods(opts.map).then(function(){
-      //enter the first zone --wait until mods have been loaded
-      CPX.hexMap.enterZone(opts.map,opts.map.zones[opts.map._zoneEnter]);
-    })
-  }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.hexMap.enterZone = function (map,zone) {
-  CPX.unit.move(CPXAU,map.seed.concat([zone.id]));
-  //the zone is now explored
-
-  //user can now see the neighboor zones
-  map._ZN[zone.id].forEach(function(el){
-    CPX.user.updateVisible(map,el);
-  })
-  
-  //hazard first
-  if(zone.class.includes('hazard') && !map.disarmed.includes(zone.id)) {
-    var hazard = zone.special.find(function(el){ return el.class[0] == 'hazard'; })
-    //encounter hazard
-    CPX.challenge.hazard(CPXAU,zone,hazard);
-  }
-  
-  //lair next
-  if(zone.class.includes('lair') && !map.cleared.includes(zone.id)) {
-    var lair = zone.special.find(function(el){ return el.class[0] == 'lair'; })
-    //encounter lair
-    CPX.challenge.lair(CPXAU,zone,lair);
-  }
-  
-  //random encounter final
-  var dP = 30;
-
-  //treasure last
-  if(zone.class.includes('treasure') && !map.looted.includes(zone.id)) {
-    var treasure = zone.special.find(function(el){ return el.class[0] == 'treasure'; })
-    //encounter lair
-    CPX.challenge.treasure(CPXAU,zone,treasure);
-  }
-
-  //update display for the move
-  CPX.display.drawHex(map);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.hexMap.mapClick = function (e) {
   var target = e.target,
@@ -472,59 +371,106 @@ CPX.hexMap.mapClick = function (e) {
   
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.display.drawHex = function (map) {
-  if(objExists(map.display.hexmap)){
+CPX.display.drawTokens = function (map) {
+  if(objExists(map.display.tokens)){
     //remove it and start fresh
-    map.display.stage.removeChild(map.display.hexmap);
+    map.display.stage.removeChild(map.display.tokens);
   }
-  map.display.hexmap = new createjs.Container();
+  map.display.tokens = new createjs.Container();
+  
+  var t={}, data={};
+  map.tokens.forEach(function(el) {
+    data= {map:map._id, cid:ac.id};
+    //type of display shape function, click function, container object, data 
+    CPX.display.makeGraphics({
+      dtype: makeShape,
+      onClick: CPX[map.class[0]].mapClick,
+      container: map.display.tokens,
+      data: {token:t,map:map,size:t.size,stroke:t.line,fill:t.color}
+    });
+  });
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.display.drawHex = function (map) {
+  //display container ids
+  var dids = ['hexmap','siteMarkers'];
+  dids.forEach(function(el) {
+    if(objExists(map.display[el])){
+      //remove it and start fresh
+      map.display.stage.removeChild(map.display[el]);
+    }
+    map.display[el] = new createjs.Container();
+  });
+  
 
-  var c={}, ac={}, cdata={}, dhex={}, color ="", alpha = 0.5;
+  var c={}, ac={}, cdata={}, ddata={}, color ="", alpha = 0.5;
   for (var x in map.cells) {
     ac= map.cells[x];
  
     if(map.zones[ac.zone].visible || map.visible.includes(ac.zone)) {
-      cdata = {realm:map.realm, map:map._id, cid:ac.id, seed:map.seed};
-      dhex = {hex:ac,map:map,data:cdata};
-      //keep the alpha at 0.5 unless the current unit is in the zone
-      alpha = 1;
-      if(CPXAU.location.join("").includes(map.seed.join("")) && CPXAU.location[CPXAU.location.length-1] == ac.zone) {
-        alpha =1;
-        dhex.unit = true;
-      }
+      //cell data
+      cdata = {map:map._id, cid:ac.id};
       //set the color based upon the zone color
       color = hexToRgbA(map.zones[ac.zone].color,alpha);
-      if(map._type == "hexPlane"){
+      if(map.class.includes("terrain")){
         color = terrainColors[ac.terrain];
       }
+      //display data and variables
+      ddata = {hex:ac,map:map,data:cdata,size:map._hexradius,stroke:"black",fill:color};
 
-      CPX.display.makeGraphics(makeHex,CPX[map._type].mapClick,map.display.hexmap,dhex,[map._hexradius,"black",color]);
+      //type of display shape function, click function, container object, data 
+      CPX.display.makeGraphics({
+        dtype: makeHex,
+        onClick: CPX[map.class[0]].mapClick,
+        container: map.display.hexmap,
+        data: ddata 
+      });
     }
+    //do all the special sites
+    ac.special.forEach(function(el) {
+      //set to circle to draw the site
+      el.shape = 'circle';
+      //set default color to white
+      color = (el.class.length==0) ? 'white' : HEXSITES[el.class[0]].color;
+      //call the graphics
+      CPX.display.makeGraphics({
+        dtype: makeShape,
+        onClick: CPX[map.class[0]].mapClick,
+        container: map.display.siteMarkers,
+        data: {hex:ac,map:map,data:cdata,size:5,shape:'circle',stroke:'black',fill:color} 
+      });
+    });
   }
-
-  map.display.stage.addChild(map.display.hexmap);
-  //have to draw everything now due to promise
+  
+  //add containers to stage
+  dids.forEach(function(el) {
+    map.display.stage.addChild(map.display[el]);  
+  })
+  //make tokens
+  CPX.display.drawTokens(map);
+  //adjust everything
   CPX.display.centerAdjust(map);
-  CPX.display.units();
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.display.clearActive = function (map) {
+  if(objExists(map.display)){
+    //remove event listers to stop multi click
+    var containers = ['hexmap','siteMarkers','tokens'];
+    containers.forEach(function(c) {
+      map.display[c].children.forEach(function(el) {
+        el.removeAllEventListeners();
+      });  
+    });
+    delete map.display;
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.display.hexMap = function (map) {
-  if(objExists(map.display)){
-    delete map.display;
-  }
+  CPX.display.clearActive(map);
+  
   map.display = {data:{}};
   map.display.canvas = $( "#"+map._id + " canvas")[0];
   map.display.stage = new createjs.Stage(map.display.canvas);
 
   CPX.display.drawHex(map);
-
-  if(map._type !="hexPlane") { 
-    footer.showZoomIn = false; 
-    footer.showZoomOut = false; 
-  }
-  if(map.parent.length>0){
-    footer.showExit = true;
-    footer.exitMap = map.seed.slice(0, 3).join("");
-  }
-
 }

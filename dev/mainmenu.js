@@ -48,23 +48,31 @@ var vMainMenu = new Vue({
     },
     About: function(){
       this.show = false;
-      CPX.vue.page.open('c-txt',false);
+      CPX.vue.page.open('c-txt','wide');
+    },
+    hexArea: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cha','');
+    },
+    areaBuilder: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cab','slim');
     },
     CephGen: function(event) {
       this.show = false;
-      CPX.vue.page.open('c-chs',true);
+      CPX.vue.page.open('c-chs','slim');
     },
     PWDGen: function(){
       this.show = false;
-      CPX.vue.page.open('c-pwd',true);
+      CPX.vue.page.open('c-pwd','slim');
     },
     PandCGen: function(){
       this.show = false;
-      CPX.vue.page.open('c-pnc',true);
+      CPX.vue.page.open('c-pnc','slim');
     },
     fpGen: function(event) {
       this.show = false;
-      CPX.vue.page.open('c-fpg',false);
+      CPX.vue.page.open('c-fpg','wide');
     },
     clearAllData: function(){
       var header = 'Clear All Saved Data';
