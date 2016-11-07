@@ -31,7 +31,7 @@ CPX.vue.page = new Vue({
       this.loadall(VU.vid).then(function(list){
         VU.allgens = list;
       })
-      //make new dungeon
+      //make new 
       VU.new();
       //set up event listeners
       HUB.$on(VU.vid+'-new', VU.new);
@@ -39,6 +39,8 @@ CPX.vue.page = new Vue({
       HUB.$on(VU.vid+'-save', VU.save);
       HUB.$on(VU.vid+'-loadObj', VU.load);
       HUB.$on(VU.vid+'-remove', VU.remove);
+      HUB.$on(VU.vid+'-add', VU.add);
+      HUB.$on(VU.vid+'-mod', VU.mod);
       HUB.$on(VU.vid+'-showload', function(){
         VU.showlist.load = !VU.showlist.load;
       });
@@ -51,6 +53,8 @@ CPX.vue.page = new Vue({
       HUB.$off(VU.vid+'-save', VU.save);
       HUB.$off(VU.vid+'-loadObj', VU.load);
       HUB.$off(VU.vid+'-remove', VU.remove);
+      HUB.$off(VU.vid+'-add', VU.add);
+      HUB.$off(VU.vid+'-mod', VU.mod);
       HUB.$off(VU.vid+'-showload', function(){
                 VU.showlist.load = !VU.showlist.load;
               });
@@ -75,9 +79,9 @@ CPX.vue.page = new Vue({
       VU.generate();
     },
     open: function(view,width){
+      this.show = true;
       this.currentView = view;
       this.width = width;
-      this.show = true;
     },
     //close opens mainmenu
     close: function() {

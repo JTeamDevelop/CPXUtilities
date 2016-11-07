@@ -186,13 +186,14 @@ CHS.main = function(RNG,p){
   if(p.hydro<0) { p.hydro = 0; }
   
   //Population
-  p.pop = RNG.diceSum('2d6')-3+p.size;
+  p.pop = RNG.diceSum('2d6')-2;
   if(p.size<3) { p.pop -= 1; }
   if(p.atm<4 && p.hydro===0) { p.pop -= 2; }
   if(p.atm>9) { p.pop -= 2; }
   else if(p.atm==6) { p.pop += 3; }
   else if([5,8].includes(p.atm)) { p.pop += 1; }
   if(p.pop>10){p.pop=10;}
+  if(p.pop<1){p.pop=1;}
 
   //starport
   p.starport = RNG.diceSum('2d6')-7+p.pop;
@@ -204,9 +205,11 @@ CHS.main = function(RNG,p){
   else { p.starport='A'; }
   //Government
   p.gov = RNG.diceSum('2d6')-7+p.pop;
+  if(p.gov<0){p.gov=0;}
   //Law
   p.law = RNG.diceSum('2d6')-7+p.pop;
   if(p.law>10){p.law=10;}
+  if(p.law<0){p.law=0;}
   //Tech Level
   p.TL = RNG.d6();
   var spTL= {A:6,B:4,C:2,D:0,E:0,X:-4};
@@ -277,7 +280,7 @@ Vue.component('c-chs-planet', {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-chs', { 
   template: '<div>'+
-  '<h2 class="center">Cepheus RPG System Generator</h2>'+
+  '<h2 class="center">Traveller RPG System Generator</h2>'+
   '<c-menubar id="CHS" v-bind:show="showmenu"></c-menubar>'+
   '<c-loadselect id="CHS" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>'+
   '<div class="content"><input class="form-control input-lg center" type="text" v-model="system.name" placeholder="NAME">'+

@@ -31,6 +31,15 @@
 .center {
   text-align: center;
 }
+.center-div {
+  margin: auto;
+}
+.front {
+  z-index:10;
+}
+.back {
+  z-index:-10;
+}
 .left {
   text-align: left;
 }
@@ -64,40 +73,78 @@
 .input-mid{
   width: 85px;
 }
+.square {
+  display:inline-block;
+  vertical-align: middle;
+  width:20px;
+  height:20px;
+}
 /* ==========================================================================
 Maps
+["water","swamp","desert","plain","forest","hill","mountain"];
+["aqua","CadetBlue","Beige","LightGreen","ForestGreen","Brown","DarkGrey"];
 ========================================================================== */
-#maps {
-  position:fixed;
-  top:15px;
-  bottom:20px;
-  left:1%;
-  right:1%;
-  overflow:auto;
+.map {
+  position: fixed;
+  width:100%;
+  top:40px;
+  bottom:65px;
+  overflow:scroll;
 }
-#maps canvas {
+.map canvas {
   display: block;
   margin: auto;
 }
+.maptool.selected {
+  background-color: rgba(0,128,0,0.5);
+}
+.palette.water { background-color: aqua;}
+.palette.swamp { background-color: CadetBlue;}
+.palette.desert { background-color: Beige;}
+.palette.plain { background-color: LightGreen;}
+.palette.forest { background-color: ForestGreen;}
+.palette.hill { background-color: Brown;}
+.palette.mountain { background-color: DarkGrey;}
 /* ==========================================================================
 Windows
 ========================================================================== */
 .window{
   position: fixed;
-  max-height:98%;
+  height:100%;
   left: 50%;
   width: 100%;
   transform: translate(-50%, 0%);
   background-color: whitesmoke;
-  overflow-y:auto;
+  overflow:auto;
+}
+.footer {
+  background-color: rgba(255,255,255,0.75);
+  position: fixed;
+  bottom: 5px;
+  width: 100%;
+  z-index:20;
 }
 @media only screen and (min-width: 425px) {
   .window.slim{
     width: 400px;
   }
+  .window .slim{
+    width: 400px;
+  }
+  .footer {
+    left: 50%;
+    width: 400px;
+    transform: translate(-50%, 0%);
+  }
 }
 @media only screen and (min-width: 820px) {
   .window.wide{
+    width: 800px;
+  }
+  .window .wide{
+    width: 800px;
+  }
+  .footer.wide {
     width: 800px;
   }
 }
@@ -119,6 +166,10 @@ Windows
   background: silver;
   border: none;
   border-bottom-style: groove;
+}
+.form-control.half {
+  display:inline;
+  width:50%;
 }
 /* ==========================================================================
 Unique

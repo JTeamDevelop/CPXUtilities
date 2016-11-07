@@ -50,6 +50,14 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-txt','wide');
     },
+    hexArea: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cha','');
+    },
+    areaBuilder: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cab','slim');
+    },
     CephGen: function(event) {
       this.show = false;
       CPX.vue.page.open('c-chs','slim');

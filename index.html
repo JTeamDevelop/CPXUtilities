@@ -9,7 +9,7 @@
   <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
   <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
   <link rel="stylesheet" type="text/css" href="src/slider.css">
-  <link rel="stylesheet" type="text/css" href="src/main.css">
+  <link rel="stylesheet" type="text/css" href="dev/main.css">
 
 </head>
 
@@ -21,11 +21,13 @@
     <h3 class="header center">Main Menu</h3>
     <div class="content">
       <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generator</button>
+      <button v-on:click="areaBuilder" type="button" class="btn btn-info btn-lg btn-block">Generic Area Builder</button>
       <button v-on:click="PWDGen" type="button" class="btn btn-info btn-lg btn-block">Perilous Wilds Dungeon Generator</button>
       <button v-on:click="PandCGen" type="button" class="btn btn-info btn-lg btn-block">People/Creature Generator</button>
-      <button v-on:click="CephGen" type="button" class="btn btn-info btn-lg btn-block">Cepheus RPG System Generator</button>
+      <button v-on:click="CephGen" type="button" class="btn btn-info btn-lg btn-block">Traveller RPG System Generator</button>
       <button v-on:click="About" type="button" class="btn btn-info btn-lg btn-block">About the Program</button>
       <button v-on:click="clearAllData" type="button" class="btn btn-info btn-lg btn-block">Clear All Data</button>
+      <a role="button" class="btn btn-info btn-lg btn-block" href="index-dev.html">Dev Page</a>
     </div>
   </div>
   <div class="notify" id="mainNotify" v-show="show" v-cloak>
@@ -127,8 +129,10 @@
 
   <script type="text/javascript" src="src/lib/vue.js"></script>
   <script type="text/javascript" src="src/lib/localforage.min.js"></script>
+  <script type="text/javascript" src="src/lib/nedb.min.js"></script>
   <script type="text/javascript" src="src/lib/jquery.noty.packaged.min.js"></script>
   <script type="text/javascript" src="src/lib/chance.min.js"></script>
+  <script type="text/javascript" src="src/lib/createjs-2015.11.26.min.js"></script>
   <script type="text/javascript" src="src/app.js"></script>
   <script type="text/javascript" src="src/encounters.js"></script>
   <script type="text/javascript" src="src/starsystem.js"></script>
@@ -136,6 +140,7 @@
   <script type="text/javascript" src="src/notify.js"></script>
   <script type="text/javascript" src="src/page.js"></script>
   <script type="text/javascript" src="src/fantasyplot.js"></script>
+  <script type="text/javascript" src="src/areabuilder.js"></script>
   <script type="text/javascript" src="src/cepheussystem.js"></script>
   <script type="text/javascript" src="src/pwdungeon.js"></script>
   <script type="text/javascript" src="src/pandcgen.js"></script>
