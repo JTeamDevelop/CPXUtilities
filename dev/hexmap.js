@@ -431,7 +431,7 @@ CPX.display.drawHex = function (map) {
       //set to circle to draw the site
       el.shape = 'circle';
       //set default color to white
-      color = (el.class.length==0) ? 'white' : HEXSITES[el.class[0]].color;
+      color = (el.class[0].length==0) ? 'white' : HEXSITES[el.class[0]].color;
       //call the graphics
       CPX.display.makeGraphics({
         dtype: makeShape,

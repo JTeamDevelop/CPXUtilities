@@ -291,7 +291,10 @@ Vue.component('c-cha', {
       if(this.map._hexradius==5 && n==-1){return;}
       if(n==1){this.map._hexradius+=5;}
       else {this.map._hexradius-=5};
-      this.display();
+      //identify bounds for display
+      CPX.hexMap.bounds(this.map);
+      //update after vue/canvas has been updated
+      Vue.nextTick(this.display); 
     },
     save: function () {
       var VU=this, doc = objCopy(this.map.opts);
