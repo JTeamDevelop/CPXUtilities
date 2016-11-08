@@ -218,7 +218,10 @@ Vue.component('c-adventure', {
         maxn:0,
         arc:[this.A]
       };
+      //save the adventure
       CPXSAVE.setItem(A.seed.join(''),A).then(function(){});
+      //load the saved adventure
+      HUB.$emit('FPG-loadObj',A);
     },
     remove: function(){
       HUB.$emit('FPG-remove',this.idx);

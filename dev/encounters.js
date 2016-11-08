@@ -322,13 +322,13 @@ var PEOPLES = {
   hybrid : ["Ape","Badger","Bat","Bear","Beetle","Boar","Cat","Cetnipede","Deer","Dog","Eagle","Elephant",
     "Frog","Goat","Horse","Lion","Mantis","Owl","Panther","Rat","Raven","Rhinoceros","Scorpion","Snake",
     "Spider","Tiger","Vulture","Wasp","Weasel","Wolf","Crab","Crocodile","Octopus","Shark","Eel"],
-  uncommonraces : ["Thornling","Mycomid"],
-  rareraces : ["*elemental","*giant","Treant"],
+  uncommonraces : ["Plant-people","Fungus-people"],
+  rareraces : ["*elemental","*giant"],
   common : [["human","demi","smallfolk","monstrous"],[0.5,0.25,0.1,0.15]],
   uncommon : [["uncommonraces","hybrid",["#common","+element"]], [1,2,2]],
   rare : [["rareraces",["#common","+construct"],['hybrid',"uncommonraces"],["hybrid","hybrid"],
     ["hybrid","+element"],["#common","+ability","+element","+aspect"]], [1,1,1,1,1,1]],
-  legendary : [["*dragon","*dragon"],[1,2]],
+  legendary : [["*dragon",['#rare',"+element","+ability","+aspect"]],[1,2]],
 }
 
 CPX.professions = function (RNG,profarray) {
