@@ -54,6 +54,10 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-cha','');
     },
+    d30City: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cfp','slim');
+    },
     areaBuilder: function(){
       this.show = false;
       CPX.vue.page.open('c-cab','slim');
