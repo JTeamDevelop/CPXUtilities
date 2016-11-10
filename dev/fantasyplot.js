@@ -23,29 +23,42 @@ CPX.DW.ImpendingDoom=[["Tyranny","rule of the strong over the weak or the few ov
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Villain generator for fantasy plot - input is the Random NUmber Generator (RNG) so that the results can be seeded 
 CPX.FP.Villain = function (RNG) {
-  //villain object, they all have the villain, nature, desire, and doom
-  var V={villain:[]}, i = RNG.integer({min:1,max:5}); 
-  V.nature = RNG.pickone(CPX.DW.DangerList[i-1]);
-  V.desire = V.nature[1];
-  V.nature = V.nature[0];
-  V.doom = RNG.pickone(CPX.DW.ImpendingDoom);
-  
-  //if it is 5 it is a cursed place - the villain is the nature
-  if(i==5) {
-    V.villain = [V.nature];
-    V.nature = '';
+  //villain gen
+  var va = [], V={}; 
+  //10% chance of a Cursed Place - impersional - villain pulled from DungeonWorld data
+  if(RNG.d10()==1){
+    //dungeon world danger - the reason becomes the danger's motive
+    va = RNG.pickone(CPX.DW.DangerList[4]);
+    V.name = va[0];
+    V.reason = va[1];
+    V.class = ['danger'];
   }
-  //otherwise the villain is randomly picked from the FP.villains array
   else {
-    //5% cance of double villain
-    if(RNG.bool({likelihood:5})){
-      V.villain.push(RNG.pickone(CPX.FP.villains));
-      V.villain.push(RNG.pickone(CPX.FP.villains));
+    //33% chance of pulling a DungeonWorld Danger 
+    if(RNG.rpg('1d3')[0]==1){
+      //from the "Ambitious Organization","Planar Force","Arcane Enemy","Horde" categories
+      va = RNG.pickone(CPX.DW.DangerList[RNG.d4()-1]);
+      //villain sitll has reason determined above
+      V.name = va[0];
+      V.class = ['danger'];
+      V.reason = RNG.pickone(SAG.vreason);
     }
+    //alternately roll up a random people to be a villain
     else {
-      V.villain.push(RNG.pickone(CPX.FP.villains));
-    }  
+      V = CPX.people(RNG,{rank:RNG.weighted(["uncommon", "rare", "legendary"], [4,0.8,0.2])});
+      V.reason = RNG.pickone(SAG.vreason);
+    }
   }
+  //pick doom
+  V.doom = RNG.pickone(CPX.DW.ImpendingDoom);
+  //make special tags
+  V.tags = [RNG.pickone(COLORDESCRIPTORS)].concat(
+    CPX.creature.special(RNG,"aspect"),
+    CPX.creature.special(RNG,"ability"),
+    CPX.creature.special(RNG,"element"),
+    CPX.creature.special(RNG,"magic")
+  );
+  V.tags = V.tags.join(', ');
   
   return V;
 }
@@ -128,7 +141,7 @@ CPX.FP.PlotTwist = function(RNG) {
   //if greater villain, generate the villain 
   if(PT=="Greater Villain") {
     var V = CPX.FP.Villain(RNG);
-    PT = "Greater Villain: " + V.villain.join(' & ')
+    PT = "Greater Villain: " + V.name;
   }
   return PT;
 }
@@ -150,51 +163,72 @@ CPX.FP.AdventureComplication = function (RNG){
     return RNG.pickone(RNG.pickone(clist));
 }
 //Core adventure generator, provide include array
-CPX.FP.Adventure = function (RNG){
+CPX.FP.Adventure = function (opts){
   //Adventure object, they all have a villain, plot, location, and factions
   //twist, complications, hook, and supporting cast are optional - include them in the include array
-  var A = {factions:[],twist:'',complication:'',hook:'',cast:[]};
-  A.villain = CPX.FP.Villain(RNG);
-  A.plot = CPX.FP.Plot(RNG);
-  A.location = CPX.FP.Location(RNG);
-  for(var i=0;i<(Number(RNG.rpg('1d3'))+1);i++){
-    A.factions.push(CPX.FP.Faction(RNG,A.factions));
+  var A = {
+    seed : opts.seed,
+    factions:[],
+    twist:'',
+    complication:'',
+    hook:'',
+    cast:[]
+  }
+  //make id and RNG
+  A._id = A.seed.join('');
+  A.RNG = new Chance(A._id);
+  
+  A.villain = CPX.FP.Villain(A.RNG);
+  A.plot = CPX.FP.Plot(A.RNG);
+  A.location = CPX.FP.Location(A.RNG);
+  for(var i=0;i<(Number(A.RNG.rpg('1d3'))+1);i++){
+    A.factions.push(CPX.FP.Faction(A.RNG,A.factions));
   }
   
-  A.twist = CPX.FP.PlotTwist(RNG);
-  A.complication = CPX.FP.AdventureComplication(RNG);
-  A.hook = RNG.pickone(CPX.FP.hooks);
-  A.cast = CPX.FP.SupportingCast(RNG);
+  A.twist = CPX.FP.PlotTwist(A.RNG);
+  A.complication = CPX.FP.AdventureComplication(A.RNG);
+  A.hook = A.RNG.pickone(CPX.FP.hooks);
+  A.cast = CPX.FP.SupportingCast(A.RNG);
   
+  //clean up RNG & return adventure
+  A.RNG = null;
+  delete A.RNG;
   return A;
 } 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Components to load with the fantasy generator 
 //Standard villain display
-Vue.component('c-villain', { 
-  props: ['villain'],
-  template: '<span>{{villain.join(` & `)}}</span>' 
+Vue.component('c-fpg-villain', { 
+props: ['V'],
+template: ''+
+  '<div class="box">'+
+    '<h4 class="center strong">Villain</h4>'+
+    '<input class="form-control center strong" type="text" v-model="V.name" placeholder="NAME">'+
+    '<div class="input-group ">'+
+      '<span class="input-group-addon strong">Tags</span>'+
+      '<textarea class="center form-control" type="textarea" v-model="V.tags"></textarea>'+
+    '</div>'+
+    '<div class="input-group ">'+
+      '<span class="input-group-addon strong">Reason</span>'+
+      '<input class="center form-control" type="text" v-model="V.reason">'+
+    '</div>'+
+  '</div>'
 })
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Standard faction display
 Vue.component('c-factions', { 
   props: ['factions'],
   template: '<div><strong>Main Factions:</strong><ul><li v-for="f in factions"><div><strong>{{f.name}} {{f.profession}}</strong> who {{f.desire}}</div>' +
             '<div v-if="f.special.length>0"><strong>Tags:</strong> {{f.special.unique().join(`, `) | capitalize }}</div></li></ul></div>' 
 })
-//Standard adventure dipplay
-Vue.component('c-adventure', {
-  props: ['A','idx','seed'],
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+Vue.component('c-fpg-cfp', {
+  props: ['A','idx'],
   template: '\
-  <h4 class="header">\
-  <div class="btn-group" role="group" aria-label="...">\
-  <button v-on:click="remove" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>\
-  <button v-if="idx>0" v-on:click="move(-1)" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-up"></span></button>\
-  <button v-on:click="move(1)" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-down"></span></button>\
-  </div> {{header}}</h4>\
   <div class="content"><input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
   <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea></div>\
-  <div><strong>Villain:</strong> <c-villain v-bind:villain="A.villain.villain"></c-villain></div>\
+  <c-fpg-villain v-bind:V="A.villain"></c-fpg-villain>\
   <div><strong>Plot:</strong> {{A.plot}}</div>\
   <div><strong>Doom:</strong> {{A.villain.doom[0]}} ({{A.villain.doom[1]}})</div>\
   <div><strong>Location:</strong> {{A.location}}</div>\
@@ -202,7 +236,27 @@ Vue.component('c-adventure', {
   <div v-if="idx>1"><strong>Twist:</strong> {{A.twist}}</div>\
   <div v-if="idx==0"><strong>Hook:</strong> {{A.hook}}</div>\
   <div v-if="idx==0"><strong>Supporting Cast: </strong><ul><li v-for="c in A.cast">{{c}}</li></ul></div>\
-  <div class="center"><button v-on:click="save" type="button" class="btn btn-info">Save This As A New Adventure</button></div>\
+  '
+})
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Standard adventure display
+Vue.component('c-fpg-result', {
+  props: ['A','idx','allgens','type'],
+  template: '\
+  <h4 class="header">\
+    <div class="btn-group" role="group" aria-label="...">\
+      <button v-on:click="remove" type="button" class="btn btn-sm">\
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+      </button>\
+      <button v-if="idx>0" v-on:click="move(-1)" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-up"></span></button>\
+      <button v-on:click="move(1)" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-down"></span></button>\
+    </div>\
+    {{header}} {{A.name}}\
+  </h4>\
+  <component v-bind:is="type" v-bind:A="A" v-bind:idx="idx"></component>\
+  <div class="center bottom-pad">\
+    <button v-on:click="save" type="button" class="btn btn-info">Save This As A New Adventure</button>\
+  </div>\
   ',
   computed: {
     header: function(){
@@ -212,16 +266,14 @@ Vue.component('c-adventure', {
   },
   methods: {
     save: function () {
-      var A = {
-        name: this.A.name,
-        seed: this.seed.concat(['-',this.A.n]),
-        maxn:0,
+      var doc ={
+        name:this.A.name,
         arc:[this.A]
-      };
-      //save the adventure
-      CPXSAVE.setItem(A.seed.join(''),A).then(function(){});
-      //load the saved adventure
-      HUB.$emit('FPG-loadObj',A);
+      }
+      CPXSAVE.setItem(this.A._id,doc).then(function(){});
+      if(!objExists(this.allgens[this.A._id])){
+        Vue.set(this.allgens, this.A._id, this.A.name);
+      }
     },
     remove: function(){
       HUB.$emit('FPG-remove',this.idx);
@@ -232,25 +284,34 @@ Vue.component('c-adventure', {
   }
 })
 //Standard faction display
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-fpg', { 
   template: '\
-  <h2 class="center">Fantasy Plot Generator</h2>\
+  <h2 class="center">Fantasy Plot Generators</h2>\
   <c-menubar id="FPG" v-bind:show="showmenu"></c-menubar>\
   <c-loadselect id="FPG" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
-  <div class="center content"><button v-on:click="add" type="button" class="btn btn-info">Add New Adventure To Arc</button></div>\
-  <div class="content" v-for="A in adventure.arc"><c-adventure v-bind:A="A" v-bind:seed="adventure.seed" v-bind:idx="$index"></c-adventure></div>\
+  <div class="center content-minor">\
+    <div class="btn-group bottom-pad" role="group" aria-label="...">\
+      <button v-on:click="JTF" type="button" class="btn btn-info">JTeam Fantasy</button>\
+      <button v-on:click="d30S" type="button" class="btn btn-info">d30 Sandbox</button>\
+    </div>\
+    <button v-show="content.length>0" v-on:click="add" type="button" class="btn btn-info">Add New Adventure To Arc</button>\
+  </div>\
+  <c-fpg-result v-for="A in content" v-bind:type="advType" v-bind:A="A" v-bind:idx="$index" v-bind:allgens="allgens"></c-fpg-result>\
 ',
   data: function () { 
     return {
       vid: 'FPG',
+      loadids: ['FPG','SAG'],
       showmenu:{
         new:true,
         load:true,
         save:true,
         close:true
       },
+      advType:'',
       showlist: {load:false},
-      adventure: {},
+      content: [],
       allgens: {}
     }
   },
@@ -265,59 +326,78 @@ Vue.component('c-fpg', {
   },
   methods: {
     add: function() {
-      this.adventure.maxn++; 
-      var id = this.adventure.seed.join('')+'-'+this.adventure.maxn; 
-      
-      this.adventure.arc.push(CPX.FP.Adventure(new Chance(id)));
-      this.adventure.arc[this.adventure.arc.length-1].n = this.adventure.maxn;
+      if(this.advType == 'c-fpg-cfp'){
+        this.content.push(CPX.FP.Adventure({
+          seed:['FPG','-',CPXC.string({length: 27, pool: base62})]
+        }));
+      }
+      else {
+        this.content.push(SAG.adventure({
+          seed:['SAG','-',CPXC.string({length: 27, pool: base62})]
+        }));
+      }
     },
     move: function(val){
-      var temp = [].concat(this.adventure.arc), a = objCopy(temp[val.i]),
+      var temp = [].concat(this.content), a = objCopy(temp[val.i]),
       newi = val.i+val.val;
       if(newi>=temp.length) {return;}
       
       temp[val.i] = objCopy(temp[newi]);
       temp[newi] = a;
-      this.adventure.arc = [].concat(temp);
+      this.content = [].concat(temp);
     },
     save: function () {
-      this.adventure.name = this.adventure.arc[0].name;
-      CPXSAVE.setItem(this.adventure._id,this.adventure).then(function(){});
-      if(!objExists(this.allgens[this.adventure._id])){
-        Vue.set(this.allgens, this.adventure._id, this.adventure.arc[0].name);
+      var doc ={
+        name:this.content[0].name,
+        arc:this.content
+      }
+      CPXSAVE.setItem(this.content[0]._id,doc).then(function(){});
+      if(!objExists(this.allgens[this.content[0]._id])){
+        Vue.set(this.allgens, this.content[0]._id, this.content[0].name);
       }
     },
     load: function (A) {
-      this.adventure = A;
+      if(A.arc[0]._id.includes('FPG-')){
+        if(this.advType=='' || this.advType == 'c-fpg-cfp'){
+          this.advType = 'c-fpg-cfp';
+          this.content = A.arc.concat(this.content);
+        }
+      }
+      else {
+        if(this.advType=='' || this.advType == 'c-sag-adv'){
+          this.advType = 'c-sag-adv';
+          this.content = A.arc.concat(this.content);
+        }
+      }
+    },
+    JTF : function (){
+      this.content = [];
+      this.advType = 'c-fpg-cfp';
+      for(var i=0;i<4;i++){
+        this.add();
+      }
+    },
+    d30S : function (){
+      this.content = [];
+      this.advType = 'c-sag-adv';
+      for(var i=0;i<4;i++){
+        this.add();
+      }
     },
     new : function () { 
-      this.generate();
+      this.advType = '';
+      this.content = [];
     },
     generate: function () {
-      var A = {
-        seed: ['FPG','-',CPXC.string({length: 21, pool: base62})],
-        maxn:0,
-        arc:[]
-      };
-      var RNG ={}, id='';
       
-      A._id= A.seed.join('');
-      
-      for(var i=0;i<4;i++){
-        A.maxn = i;
-        RNG = new Chance(A.seed.join('')+'-'+i);
-        A.arc.push(CPX.FP.Adventure(RNG));
-        A.arc[A.arc.length-1].n = i;
-      }
-      this.adventure = A;
     },
     remove: function(idx){
-      this.adventure.arc.splice(idx,1);
+      this.content.splice(idx,1);
     },
     //close opens mainmenu
     close: function() {
       CPX.vue.page.close();
-      this.adventure={};
+      this.content=[];
       this.allgens = [];
     }
   }

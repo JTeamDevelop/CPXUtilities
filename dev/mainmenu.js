@@ -76,7 +76,7 @@ var vMainMenu = new Vue({
     },
     fpGen: function(event) {
       this.show = false;
-      CPX.vue.page.open('c-fpg','wide');
+      CPX.vue.page.open('c-fpg','slim');
     },
     clearAllData: function(){
       var header = 'Clear All Saved Data';

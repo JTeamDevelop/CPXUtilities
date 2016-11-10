@@ -7,6 +7,14 @@
   padding:5px;
   margin:1px;
 }
+.header{
+  margin:0px;
+  padding: 5px 10px;
+  min-height: 32px;
+  background: silver;
+  border: none;
+  border-bottom-style: groove;
+}
 .box {
   border: 1px solid black; 
 }
@@ -159,13 +167,6 @@ Windows
 }
 .notify .content {
   max-height: 400px;
-}
-.header{
-  margin:0px;
-  padding: 5px 10px;
-  background: silver;
-  border: none;
-  border-bottom-style: groove;
 }
 .form-control.half {
   display:inline;

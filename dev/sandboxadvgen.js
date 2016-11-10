@@ -47,7 +47,7 @@ var SAG = {
   'evil','flame(s)','glory','gold','greed','innocence','immortality','judgement','justice',
   'life','light/day','madness','mystery','power','rebirth','revenge','shadow','terror',
   'treasure','vengeance','wonder','wrath'],
-  npc: ['cleric','druid/cleric','fighter','paladin/fighter','ranger/dwarf','magic-user',
+  NPC: ['cleric','druid/cleric','fighter','paladin/fighter','ranger/dwarf','magic-user',
   'illusionist/magic-user','thief','assassin/halfling','monk/elf','animal trainer',
   'hermit','merchant','misc. NPC','pilgrim','sage','scribe','spy','smith','tradesman',
   'king','queen','queen mother','noble','noble household','noble teacher','castle employee',
@@ -57,132 +57,40 @@ SAG.adventure = function(opts){
   var A = {
     seed : opts.seed
   }
+  //make id and RNG
   A._id = A.seed.join('');
   A.RNG = new Chance(A._id);
   
   //adventure keys
-  var x = ['theme','trigger','goal','obstacle','location','feature','phenomena','vreason','artifact','npc'];
+  var x = ['theme','trigger','goal','obstacle','location','feature','phenomena','artifact','NPC'];
   x.forEach(function(el) {
+    //randomly pick from the data array
     A[el] = A.RNG.pickone(SAG[el]);
   });
   
-  var v = [];
-  if(A.RNG.d10()==1){
-    v = A.RNG.pickone(CPX.DW.DangerList[4]);
-    A.villain = v[0];
-    A.vreason = v[1];
-  }
-  else {
-    if(A.RNG.d3()==1){
-      v = A.RNG.pickone(CPX.DW.DangerList[A.RNG.d4()-1]);
-      A.villain = v[0];  
-    }
-    else {
-      A.villain = CPX.people(A.RNG,{rank:A.RNG.weighted(["uncommon", "rare", "legendary"], [4,0.8,0.2])});
-    }
-  }
+  //villain gen
+  A.villain = CPX.FP.Villain(A.RNG);
   
+  //clean up RNG & return adventure
   A.RNG = null;
   delete A.RNG;
   return A;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-sag-result', { 
-  props: ['A','allgens','idx'],
+Vue.component('c-sag-adv', { 
+  props: ['A','idx'],
   template: '\
-  <div class="box margin-full">\
-    <h4 class="header center">\
-      {{A.name}}\
-      <button v-on:click="remove" type="button" class="close"><span aria-hidden="true">&times;</span></button>\
-    </h4>\
-    <div class="content">\
-      <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
-      <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
-      <div v-for="key in keys">\
-      </div>\
-      <button v-on:click="save" type="button" class="btn btn-info btn-block">Save</button>\
-    </div>\
+  <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
+  <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
+  <c-fpg-villain v-bind:V="A.villain"></c-fpg-villain>\
+  <div v-for="key in keys" class="input-group ">\
+    <span class="input-group-addon strong">{{key | capitalize}}</span>\
+    <input class="center form-control" type="text" v-model="A[key]">\
   </div>\
   ',
   data: function(){
     return {
-      keys: ['theme','trigger','goal','obstacle','location','feature','phenomena','vreason','artifact','npc']
-    }
-  },
-  computed: {
-    nature: function(){
-      return this.object.class.slice(1).unique().join(", ");
-    }
-  },
-  methods:{
-    save: function(){
-      CPXSAVE.setItem(this.A._id,this.A).then(function(){});
-      if(!objExists(this.allgens[this.A._id])){
-        Vue.set(this.allgens, this.A._id, this.A.name);
-      }
-    },
-    remove: function(){
-      HUB.$emit('SAG-remove',this.idx);
-    }
-  }
-})
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-sag', { 
-  template: '\
-  <div>\
-    <h2 class="center">People & Creature Generator</h2>\
-    <c-menubar id="SAG" v-bind:show="showmenu"></c-menubar>\
-    <c-loadselect id="SAG" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
-    <c-sag-result v-for="A in current" v-bind:A="A" v-bind:idx="$index" v-bind:allgens="allgens"></c-sag-result>\
-  </div>\
-  ',
-  data: function () {
-    return {
-      vid: 'SAG',
-      showmenu:{
-        new:true,
-        load:true,
-        save:false,
-        close:true
-      },
-      showlist: {load:false},
-      current: [],
-      allgens: {}
-    }
-  },
-  //called when created
-  created: function () {
-    CPX.vue.page.onCreated(this);
-  },
-  beforeDestroy: function () {
-    CPX.vue.page.onBeforeDestroy(this);
-  },
-  methods: {
-    load: function (A) {
-      var push = [A].concat(this.current);
-      this.current = push;
-    },
-    new : function () { 
-      this.current=[];
-      this.generate();
-    },
-    generate: function () {
-      var seed=[];
-      for(var i=0;i<5;i++){
-        seed = ['SAG','-',CPXC.string({length: 27, pool: base62})];
-        this.current.push(SAG.adventure({seed:seed}));
-      }
-    },
-    remove: function(idx){
-      this.current.splice(idx,1);
-    },
-    //close opens mainmenu
-    close: function() {
-      CPX.vue.page.close();
-      this.current=[];
-      this.saveID = '';
-      this.allgens = [];
+      keys: ['theme','trigger','goal','obstacle','location','feature','phenomena','artifact','NPC']
     }
   }
 })
