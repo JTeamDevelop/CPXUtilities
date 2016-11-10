@@ -11,8 +11,8 @@ Vue.component('c-txt', {
   methods: {
     close: function() { CPX.vue.page.close(); },
     showOGL: function() { 
-      this.close();
-      CPX.vue.page.open('c-ogl',false); 
+      CPX.vue.page.show=false;
+      CPX.vue.page.open('c-ogl','wide'); 
     }
   }
 })
@@ -28,7 +28,10 @@ CPX.vue.page = new Vue({
   methods: {
     onCreated: function (VU) {
       //calls the loadall function to pull saved data
-      this.loadall(VU.vid).then(function(list){
+      var load = VU.vid;
+      //if there is an array pass it to load multiple types
+      if(objExists(VU.loadids)) { load = VU.loadids; }
+      this.loadall(load).then(function(list){
         VU.allgens = list;
       })
       //make new 
@@ -64,8 +67,21 @@ CPX.vue.page = new Vue({
       return new Promise(function(resolve,reject){
         var list = {};
         CPXSAVE.iterate(function(value, key, idx){
-          if(key.includes(vid+'-')){
-            list[key] = value.name;  
+          //check if an arrai of ids is provided
+          if(Array.isArray(vid)){
+            //if it is an array loop through ids
+            vid.forEach(function(el) {
+              //check the key
+              if(key.includes(el+'-')){
+                list[key] = value.name;  
+              }  
+            });
+          }
+          //otherwise use the id provided
+          else{
+            if(key.includes(vid+'-')){
+              list[key] = value.name;  
+            }
           }
         }).then(function() {
           resolve(list);
