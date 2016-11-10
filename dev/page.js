@@ -11,8 +11,8 @@ Vue.component('c-txt', {
   methods: {
     close: function() { CPX.vue.page.close(); },
     showOGL: function() { 
-      this.close();
-      CPX.vue.page.open('c-ogl',false); 
+      CPX.vue.page.show=false;
+      CPX.vue.page.open('c-ogl','wide'); 
     }
   }
 })
