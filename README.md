@@ -13,11 +13,15 @@ this page you will delete this data (so beware).
 </p>
 <strong>Current Utilities:</strong>
 <ul>
-<li><strong>Fantasy Plot Generator</strong>
-<p>A random plot generator that creates a number of story prompts.  
-It is built on a central villain and plot that takes place over a three adventure arc.  
-Each adventure has its own villain, plot, location and factions – all randomly generated.
-A JTeam original. 
+<li><strong>HexMap Builder</strong>
+<p>Create your own hex based maps for your game.  Edit the terrain of individual hexes, and populate them
+with cities, ruins, lairs, and more.
+</p>
+</li>
+<li><strong>Fantasy Plot Generators</strong>
+<p>Two different Random Plot Generators - one from the JTeam and the other from the 
+<a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Companion</a>.
+Both create a number of adventure prompts. Each adventure has its own villain, plot, location and factions – all randomly generated.
 </p>
 </li>
 <li><strong><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
@@ -46,6 +50,10 @@ licensed under a Creative Commons Attribution 3.0 Unported license.
 <li><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
 <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
 from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
+</li>
+<li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
+<em>d30 Sandbox Companion</em></a>, by Richard J. LeBlanc, Jr. licensed under the 
+<span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
 </li>
 <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
 <em>Cepheus Engine System Reference Document</em></a>, 
