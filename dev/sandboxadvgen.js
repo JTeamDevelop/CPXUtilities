@@ -62,14 +62,11 @@ SAG.adventure = function(opts){
   A.RNG = new Chance(A._id);
   
   //adventure keys
-  var x = ['theme','trigger','goal','obstacle','location','feature','phenomena','artifact','NPC'];
+  var x = ['theme','trigger','goal','obstacle','location','feature','phenomena','artifact','vreason','NPC'];
   x.forEach(function(el) {
     //randomly pick from the data array
     A[el] = A.RNG.pickone(SAG[el]);
   });
-  
-  //villain gen
-  A.villain = CPX.FP.Villain(A.RNG);
   
   //clean up RNG & return adventure
   A.RNG = null;
@@ -82,7 +79,10 @@ Vue.component('c-sag-adv', {
   template: '\
   <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
   <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
-  <c-fpg-villain v-bind:V="A.villain"></c-fpg-villain>\
+  <div class="input-group ">\
+    <span class="input-group-addon strong">Villain Reason</span>\
+    <input class="center form-control" type="text" v-model="A.vreason">\
+  </div>\
   <div v-for="key in keys" class="input-group ">\
     <span class="input-group-addon strong">{{key | capitalize}}</span>\
     <input class="center form-control" type="text" v-model="A[key]">\

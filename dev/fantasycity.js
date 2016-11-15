@@ -163,6 +163,7 @@ CPX.CFP.stronghold = function (opts){
     S.class.push(CPX.CFP.stype[lt][0]);
     size = CPX.CFP.ssize[lt][S.size];
     S.size = S.RNG.rpg(size[0])[0]+size[1];
+    S.type = CPX.CFP.stype[lt][S.type];
   }
   else if(['fighter','cleric'].includes(lt)){
     S.class.push(CPX.CFP.stype.fighter[0]);
@@ -173,16 +174,17 @@ CPX.CFP.stronghold = function (opts){
       size = CPX.CFP.ssize.fighter.rings[S.size];
     }
     S.size = S.RNG.rpg(size[0])[0]+size[1];
+    S.type = CPX.CFP.stype.fighter[S.type];
   }
   else {
     S.class.push('Tree Stronghold');
     size = CPX.CFP.ssize.elf.trees[S.size];
-    S.size = [1,0];
-    S.size[1] = S.RNG.rpg(size[0])[0]+size[1];
+    S.size = S.RNG.rpg(size[0])[0]+size[1];
 
     if(S.type>1){
-      S.size[0] = S.RNG.rpg('1d'+CPX.CFP.ssize.elf.levels[S.type-1]);
+      S.type = S.RNG.rpg('1d'+CPX.CFP.ssize.elf.levels[S.type-1]);
     }
+    S.type += ' trees'
   }
 
   S.RNG = null;
@@ -224,12 +226,13 @@ CPX.CFP.city = function (opts){
   P.economy = P.RNG.pickone(CPX.CFP.economy);
   P.taxes = P.RNG.pickone(CPX.CFP.taxes);
   //government
-  P.govt = P.RNG.pickone(CPX.CFP.govt);
+  P.government = P.RNG.natural({min:0,max:CPX.CFP.govt.length-1});
   //view of outsiders
   P.outsiders = P.RNG.pickone(CPX.CFP.outsiders);
   //issues
   P.issue = P.RNG.pickone(CPX.CFP.issues);
   P.idegree = P.RNG.pickone(CPX.CFP.issuedegree);
+  
   //threats
   P.threat = P.RNG.pickone(CPX.CFP.threats);
   
@@ -242,38 +245,89 @@ Vue.component('c-cfp-ppl', {
   props:['P'],
   template: ''+
   '<div class="content-minor box">'+
-    '<strong>{{P.name}}</strong>'+
-    '<div v-if="P.class.length>1"><strong>Nature: </strong>{{P.class.join(", ") | capitalize}}</div>'+
-    '<div v-if="P.special.length>0"><strong>Tags:</strong> {{P.special.join(", ") | capitalize}}</div>'+
+    '<input class="center form-control strong" type="text" v-model="P.name">'+
+    '<div class="input-group" v-if="P.tags.length>0">'+
+      '<span class="input-group-addon strong">Tags</span>'+
+      '<input class="center form-control" type="text" v-model="P.tags">'+
+    '</div>'+
   '<div>'
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+Vue.component('c-cfp-30S', { 
+props:['obj'],
+template: ''+
+  '<div class="content">'+
+    '<input class="form-control input-lg center" type="text" v-model="obj.name" placeholder="NAME">'+
+    '<textarea class="form-control" type="textarea" v-model="obj.notes" placeholder="ADD NOTES"></textarea>'+
+    '<div class="input-group">'+
+       '<span class="input-group-addon strong">Leader</span>'+
+       '<input class="center form-control" type="text" v-model="obj.leader.class">'+
+       '<span class="input-group-addon strong">Level</span>'+
+       '<input class="center form-control" type="number" v-model="obj.leader.level">'+
+    '</div>'+
+    '<div class="input-group">'+
+      '<span class="input-group-addon strong">Type</span>'+
+      '<input class="center form-control" type="text" v-model="obj.type">'+
+      '<span class="input-group-addon strong">Size</span>'+
+      '<input class="center form-control" type="text" v-model="obj.size">'+
+    '</div>'+
+  '</div>',
+  data: function () {
+    return {
+    }
+  }
+})
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-cfp-city', { 
-  props:['city','idx','allgens'],
+Vue.component('c-cfp-30C', { 
+props:['obj'],
+template: ''+
+  '<div class="content">'+
+    '<input class="form-control input-lg center" type="text" v-model="obj.name" placeholder="NAME">'+
+    '<textarea class="form-control" type="textarea" v-model="obj.notes" placeholder="ADD NOTES"></textarea>'+
+    '<div class="content-minor box">'+
+      '<div class="header strong center">Population ({{obj.pop}})</div>'+
+      '<c-cfp-ppl v-for="ppl in obj.people" v-bind:P="ppl"></c-cfp-ppl>'+
+    '</div>'+
+    '<div class="input-group">'+
+      '<span class="input-group-addon strong">Government</span>'+
+      '<select class="form-control" v-model="obj.government">'+
+        '<option  v-for="g in govt" v-bind:value="$index">{{g[0]}}</option>'+
+      '</select>'+
+    '</div>'+
+    '<div class="center strong bottom-pad">{{govt[obj.government][1]}}</div>'+
+    '<div v-for="key in keys" class="input-group">'+
+       '<span class="input-group-addon strong">{{titles[$index] | capitalize}}</span>'+
+       '<input class="center form-control" type="text" v-model="obj[key]">'+
+    '</div>'+
+  '</div>',
+  data: function () {
+    return {
+      keys : ['economy','taxes','issue','idegree','threat'],
+      titles : ['economy','taxes','issue','Issue Degree','threat'],
+      govt: CPX.CFP.govt
+    }
+  }
+})
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+Vue.component('c-cfp-result', { 
+  props:['obj','idx','allgens'],
   template: ''+
   '<h4 class="center header">'+
-    '{{city.name}} [{{city.class[1]}}]'+
+    '{{obj.name}} {{obj.class[1] | capitalize}}'+
     '<button v-on:click="remove" type="button" class="close"><span aria-hidden="true">&times;</span></button>'+
   '</h4>'+
-  '<div class="content">'+
-    '<input class="form-control input-lg center" type="text" v-model="city.name" placeholder="NAME">'+
-    '<textarea class="form-control" type="textarea" v-model="city.notes" placeholder="ADD NOTES"></textarea>'+
-    '<div v-show="city.class[0]==`city`">'+
-      '<div><strong>Government:</strong> {{city.govt[0] | capitalize}} ({{city.govt[1]}})</div>'+
-      '<div><strong>Economy:</strong> {{city.economy | capitalize}} (Taxes: {{city.taxes}})</div>'+
-      '<div><strong>Local Issue:</strong> {{city.issue | capitalize}} ({{city.idegree}})</div>'+
-      '<div><strong>Threat:</strong> {{city.threat | capitalize}}</div>'+
-      '<div class="header strong">Population: {{city.pop}}</div>'+
-      '<c-cfp-ppl v-for="ppl in city.people" v-bind:P="ppl"></c-cfp-ppl>'+
-    '</div>'+
-    '<button v-on:click="save" type="button" class="btn btn-info btn-block">Save</button>'+
-  '</div>',
+  '<component v-bind:is="type" v-bind:obj="obj" v-bind:idx="idx"></component>'+
+  '<button v-on:click="save" type="button" class="btn btn-info btn-block bottom-pad">Save</button>',
+  computed: {
+    type: function(){
+      return 'c-cfp-'+this.obj.seed[0];
+    }
+  },
   methods:{
     save: function(){
-      CPXSAVE.setItem(this.city._id,this.city).then(function(){});
-      if(!objExists(this.allgens[this.city._id])){
-        Vue.set(this.allgens, this.city._id, this.city.name);
+      CPXSAVE.setItem(this.obj._id,this.obj).then(function(){});
+      if(!objExists(this.allgens[this.obj._id])){
+        Vue.set(this.allgens, this.obj._id, this.obj.name);
       }
     },
     remove: function(){
@@ -286,20 +340,32 @@ Vue.component('c-cfp-city', {
 Vue.component('c-cfp', { 
   template: ''+
   '<div>'+
-    '<h2 class="center">OSR City Generator</h2>'+
+    '<h2 class="center">City/Stronghold Generator</h2>'+
     '<c-menubar id="CFP" v-bind:show="showmenu"></c-menubar>'+
     '<c-loadselect id="CFP" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>'+
-    '<c-cfp-city v-for="city in current" v-bind:city="city" v-bind:idx="$index" v-bind:allgens="allgens"></c-cfp-city>'+
+    '<div class="center content-minor">'+
+      '<div class="btn-group bottom-pad" role="group" aria-label="...">'+
+        '<button v-on:click="d30C" type="button" class="btn btn-info">d30 City</button>'+
+        '<button v-on:click="d30S" type="button" class="btn btn-info">d30 Stronghold</button>'+
+      '</div>'+
+      '<div class="btn-group bottom-pad" role="group" aria-label="...">'+
+        '<button v-on:click="DWS" type="button" class="btn btn-info">DW Stading</button>'+
+        '<button v-on:click="CPC" type="button" class="btn btn-info">CPX City</button>'+
+      '</div>'+
+    '</div>'+
+    '<c-cfp-result v-for="obj in current" v-bind:obj="obj" v-bind:type="type" v-bind:idx="$index" v-bind:allgens="allgens"></c-cfp-result>'+
   '</div>',
   data: function () {
     return {
       vid: 'CFP',
+      loadids: ['30C','30S','DWS','CPC'],
       showmenu:{
         new:true,
         load:true,
-        save:true,
+        save:false,
         close:true
       },
+      type: '',
       showlist: {load:false},
       current: [],
       allgens: {}
@@ -319,25 +385,43 @@ Vue.component('c-cfp', {
     },
     new : function () { 
       this.current=[];
-      this.generate();
+    },
+    d30C : function () { 
+      this.current=[];
+      for(var i=0;i<4;i++){
+        this.current.push(CPX.CFP.city({
+          seed:['30C','-',CPXC.string({length: 27, pool: base62})],
+          type: CPXC.rpg('1d9')[0]+1
+        }));
+      }
+    },
+    d30S : function () {
+      this.current=[];
+      for(var i=0;i<4;i++){
+        this.current.push(CPX.CFP.stronghold({
+          seed:['30S','-',CPXC.string({length: 27, pool: base62})]
+        }));
+      }
+    },
+    DWS : function () {
+      this.current=[];
+      for(var i=0;i<4;i++){
+        this.current.push(CPX.DWSteading({
+          seed:['DWS','-',CPXC.string({length: 27, pool: base62})],
+          type : CPXC.pickone(CPX.data.DWSteadings.basic)
+        }));
+      }
+    },
+    CPC : function () {
+      this.current=[];
+      for(var i=0;i<4;i++){
+        this.current.push(CPX.city({
+          seed:['CPC','-',CPXC.string({length: 27, pool: base62})],
+          size : CPXC.natural({min:1,max:5})
+        }));
+      }
     },
     generate: function () {
-      var seed=[], type=0;
-      for(var i=0;i<4;i++){
-        type = CPXC.rpg('1d9')[0]+1;
-        seed = ['CFP','-',CPXC.string({length: 27, pool: base62})];
-        this.current.push(CPX.CFP.city({
-          seed:seed,
-          type: type
-        }));
-      }
-      for(var i=0;i<4;i++){
-        seed = ['CFP','-',CPXC.string({length: 27, pool: base62})];
-        this.current.push(CPX.CFP.stronghold({
-          seed:seed
-        }));
-      }
-      this.current = CPXC.shuffle(this.current);
     },
     remove: function(idx){
       this.current.splice(idx,1);

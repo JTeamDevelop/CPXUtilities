@@ -387,6 +387,7 @@ CPX.people = function (RNG,opts) {
   //reduce duplicates
   people.class = people.class.unique();
   people.special = people.special.unique();
+  people.tags = people.special.join(', ');
 
   return people;
 }

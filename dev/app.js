@@ -4,7 +4,8 @@ const CPX = {
   gen:{},
   user:{},
   vue: {},
-  realm:{}
+  realm:{},
+  data:{}
 };
 //Save db for Indexed DB - localforage
 const CPXSAVE = localforage.createInstance({ name: "CPXSave", storeName: "CPXsave" });

@@ -234,23 +234,3 @@ CPX.cellArray = function (map) {
   }
   return cA;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function mapLocation(dhex) {
-  var hex = dhex.hex, size = dhex.map._hexradius, pointy = dhex.map._pointy;
-
-  var deg = -90;
-  if(!dhex.map._pointy){
-    deg = 0;
-  }
-
-  var center = CPX.hex.center(size,hex,pointy),
-  bounds = dhex.map.bounds;
-  center.x+= bounds.x/2;
-  center.y+= bounds.y/2;
-
-  if(objExists(dhex.viewcenter)){
-    center.x-=dhex.viewcenter.x;
-    center.y-=dhex.viewcenter.y;
-  }
-  return center;
-}

@@ -292,7 +292,7 @@ Vue.component('c-fpg', {
   <c-loadselect id="FPG" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
   <div class="center content-minor">\
     <div class="btn-group bottom-pad" role="group" aria-label="...">\
-      <button v-on:click="JTF" type="button" class="btn btn-info">JTeam Fantasy</button>\
+      <button v-on:click="JTF" type="button" class="btn btn-info">CPX Fantasy</button>\
       <button v-on:click="d30S" type="button" class="btn btn-info">d30 Sandbox</button>\
     </div>\
     <button v-show="content.length>0" v-on:click="add" type="button" class="btn btn-info">Add New Adventure To Arc</button>\

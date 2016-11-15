@@ -81,6 +81,9 @@
 .input-mid{
   width: 85px;
 }
+.wf-m{
+  width:100px;
+}
 .square {
   display:inline-block;
   vertical-align: middle;

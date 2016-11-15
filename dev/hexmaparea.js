@@ -165,28 +165,40 @@ Vue.component('c-cha', {
     <div v-show="!showlist.minimal">\
       <c-menubar id="CHA" v-bind:show="showmenu"></c-menubar>\
       <c-loadselect id="CHA" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
+      <div class="center content-minor">\
+        <div class="btn-group" role="group" aria-label="...">\
+          <button v-on:click="build" type="button" class="btn btn-info">Build Your Own</button>\
+          <button v-on:click="random" type="button" class="btn btn-info">Random Hex Area</button>\
+        </div>\
+      </div>\
+      <div class="input-group strong" v-show="showlist.globalTerrain">\
+        <span class="input-group-addon strong">Pop Density</span>\
+        <select class="form-control" v-model="popdensity">\
+          <option v-for="d in desnities" v-bind:value="$index">{{d | capitalize}}</option>\
+        </select>\
+      </div>\
+      <div class="input-group strong" v-show="showlist.globalTerrain">\
+        <span class="input-group-addon strong">Global Terrain</span>\
+        <select class="form-control" v-model="dataterrain">\
+          <option v-for="t in terrains" v-bind:value="$index">{{t | capitalize}}</option>\
+        </select>\
+        <span class="input-group-btn" v-show="showlist.changeTerrain">\
+          <button v-on:click="globalTerrain" type="button" class="btn strong">Change</button>\
+        </span>\
+      </div>\
+      <div class="center">\
+        <div class="btn-group" role="group" aria-label="...">\
+          <button v-on:click="addCells(`w`)" type="button" class="btn strong">\
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Width\
+          </button>\
+          <button v-on:click="addCells(`h`)" type="button" class="btn strong">\
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Height\
+          </button>\
+        </div>\
+      </div>\
       <div class="content-minor">\
         <input class="form-control input-lg center" type="text" v-model="map.name" placeholder="NAME">\
         <textarea class="form-control pad-y" type="textarea" v-model="map.notes" placeholder="ADD NOTES"></textarea>\
-        <div class="center">\
-          <div class="input-group strong">\
-            <span class="input-group-addon strong">Global Terrain</span>\
-            <select class="form-control" v-model="dataterrain">\
-              <option v-for="t in terrains" v-bind:value="$index">{{t | capitalize}}</option>\
-            </select>\
-            <span class="input-group-btn">\
-              <button v-on:click="globalTerrain" type="button" class="btn strong">Change</button>\
-            </span>\
-          </div>\
-          <div class="btn-group" role="group" aria-label="...">\
-            <button v-on:click="addCells(`w`)" type="button" class="btn strong">\
-              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Width\
-            </button>\
-            <button v-on:click="addCells(`h`)" type="button" class="btn strong">\
-              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Height\
-            </button>\
-          </div>\
-        </div>\
       </div>\
     </div>\
     <c-cha-cell v-for="cid in map.selected" v-bind:cell="map.cells[cid]" v-bind:mid="map._id"></c-cha-cell>\
@@ -226,11 +238,15 @@ Vue.component('c-cha', {
       },
       showlist: {
         load:false,
-        map:false,
+        map:true,
+        changeTerrain:false,
+        globalTerrain: true,
         minimal:false,
         paint:false,
       },
       front:'back',
+      desnities : CPX.CFP.densities,
+      popdensity : 0,
       terrains: TERRAINS,
       tcolor: terrainColors,
       palette: -1,
@@ -335,18 +351,34 @@ Vue.component('c-cha', {
       }
     },
     new : function () {
+      this.showlist.globalTerrain = true;
+      this.showlist.changeTerrain = false;
       if(objExists(this.map.display)){
         //clear the old map display so clicks register
         CPX.display.clearActive(this.map);
       }
-      
+      this.map = {};
+    },
+    random: function () {
+      this.new();
+      this.showlist.globalTerrain = false;
+      this.seed = ['CHM','-',CPXC.string({length: 27, pool: base62})];
+      CPXDB[this.seed.join('')] = this.map = CPX.hexMapGen({
+        seed:this.seed,
+        terrain: this.dataterrain
+      });
+      //reference
+      this.map.VU = this;
+      //update after vue/canvas has been updated
+      Vue.nextTick(this.display);
+    },
+    build: function () {
+      this.new();
+      this.showlist.changeTerrain = true;
       this.width = 7; 
       this.height = 7;
       this.seed = ['CHA','-',CPXC.string({length: 27, pool: base62})];
-      this.showlist.map=true;
-      this.generate();
-    },
-    generate: function () {
+      
       CPXDB[this.seed.join('')] = this.map = CPX.rectHexArea({
         seed:this.seed,
         width:this.width,
@@ -366,8 +398,7 @@ Vue.component('c-cha', {
     close: function() {
       CPX.vue.page.close();
       this.map = {};
-      this.allgens = [];
-      this.active = false;
+      this.allgens = {};
     }
   }
 })

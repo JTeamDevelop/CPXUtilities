@@ -4,6 +4,26 @@ const terrainColors = ["aqua","CadetBlue","Beige","LightGreen","ForestGreen","Br
 const CLIMATES = ["arctic","sub-arctic","temperate","sub-tropical","tropical"];
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+function mapLocation(dhex) {
+  var hex = dhex.hex, size = dhex.map._hexradius, pointy = dhex.map._pointy;
+
+  var deg = -90;
+  if(!dhex.map._pointy){
+    deg = 0;
+  }
+
+  var center = CPX.hex.center(size,hex,pointy),
+  bounds = dhex.map.bounds;
+  center.x+= bounds.x/2;
+  center.y+= bounds.y/2;
+
+  if(objExists(dhex.viewcenter)){
+    center.x-=dhex.viewcenter.x;
+    center.y-=dhex.viewcenter.y;
+  }
+  return center;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 function makeHex(opts) {
   var size = opts.size,stroke=opts.stroke,fill=opts.fill;
   var center = mapLocation(opts), deg = -90;
@@ -69,39 +89,3 @@ CPX.display.centerAdjust = function (map) {
   });
   map.display.stage.update();
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.display.makeCanvas = function (VU,map) {
-  $(".map").removeClass("active");
-  $(".map").slideUp();
-  if ( $( "#"+map._id ).length ) {
-    if(map._type == "hexMap"){
-      footer.showExit = true;
-      footer.showEnter = true;
-      footer.showZoomOut = false;
-      footer.showZoomIn = false;
-      footer.exitMap = map.seed.slice(0,3).join("");
-    }
-    else {
-      footer.showExit = false;
-      footer.showZoomIn = true;
-      if(map._type == "atlas") {
-        footer.showZoomOut = true;
-        footer.showZoomIn = false;
-        footer.showEnter = true;
-      }
-    }
-    $( "#"+map._id ).addClass("active");
-    $( "#"+map._id ).slideDown();
-    return false;
-  } 
-  else {
-    var B = {x:800, y:800};
-    if(map._dtype !='sector') {
-      B= CPX.hex.mapBounds(map);
-    }
-    $("#maps").append('<div id='+map._id+' class="map active"><canvas width="'+B.x+'" height="'+B.y+'"></canvas>');
-    callback(map);
-  }
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
