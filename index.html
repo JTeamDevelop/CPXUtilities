@@ -7,9 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript" src="src/lib/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
-  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-  <link rel="stylesheet" type="text/css" href="src/slider.css">
-  <link rel="stylesheet" type="text/css" href="dev/main.css">
+  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="src/cpxu-1.1.min.css">
 
 </head>
 
@@ -20,7 +19,9 @@
   <div id="mainmenu" class="window slim" v-show="show" v-cloak>
     <h3 class="header center">Main Menu</h3>
     <div class="content">
-      <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generator</button>
+      <button v-on:click="hexArea" type="button" class="btn btn-info btn-lg btn-block">HexMap Area Builder</button>
+      <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generators</button>
+      <button v-on:click="cityGen" type="button" class="btn btn-info btn-lg btn-block">City/Stronghold Generator</button>
       <button v-on:click="areaBuilder" type="button" class="btn btn-info btn-lg btn-block">Generic Area Builder</button>
       <button v-on:click="PWDGen" type="button" class="btn btn-info btn-lg btn-block">Perilous Wilds Dungeon Generator</button>
       <button v-on:click="PandCGen" type="button" class="btn btn-info btn-lg btn-block">People/Creature Generator</button>
@@ -57,12 +58,25 @@
         </p>
         <strong>Current Utilities:</strong>
         <ul>
-          <li><strong>Fantasy Plot Generator</strong>
-          <p>A random plot generator that creates a number of story prompts.  
-          It is built on a central villain and plot that takes place over a three adventure arc.  
-          Each adventure has its own villain, plot, location and factions – all randomly generated.
-          A JTeam original. 
-          </p>
+          <li><strong>HexMap Editor</strong>
+            <p>Either generate a random hex map or build your own.   
+            Modify the terrain of individual hexes, and populate them with cities, ruins, lairs, and more.
+            </p>
+          </li>
+          <li><strong>Fantasy Plot Generators</strong>
+            <p>Two different Random Plot Generators: CPX and  
+            <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Companion</a>.
+            Both create a number of adventure prompts. Each adventure has its own villain, plot, location and factions – all randomly generated.
+            </p>
+          </li>
+          <li><strong>City/Stronghold Generator</strong>
+            <p>Four Generators:    
+              <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox City</a>, 
+              <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Stronghold</a>, 
+              <a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+              Perilous Wilds (Dungeon World)</a> Steading, and CPX City.  Provides population, tags, trouble, etc 
+              and all data is editable.  
+            </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
             Perilous Wilds</a> Dungeon Generator</strong>
@@ -71,17 +85,21 @@
             There are no grids here - pure theater of the mind.  
             <p>
           </li>
+          <li><strong>Generic Area Builder</strong>
+            <p>Create generic areas built from smaller zones.   
+            </p>
+          </li>
           <li><strong>People/Creature Generator</strong>
-          <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
-          No statistics are provided, but most will have special ability "tags" to make them unique. 
-          </p>
+            <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
+            No statistics are provided, but most will have special ability "tags" to make them unique. 
+            </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
-            Cepheus RPG</a> Star System Generator</strong>
+            Traveller RPG</a> Star System Generator</strong>
             <p>Generates a random star system based upon tables found in the SRD.</p>
           </li>
         </ul>
-        <strong>This utility relies on the following sources:</strong> 
+        <strong>This utility relies data and rules from the following sources:</strong> 
         <ul>
           <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
             <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
@@ -91,9 +109,21 @@
             <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
           from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
           </li>
+          <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a>, 
+          by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
+            <em>d30 Sandbox Companion</em></a>, 
+          by Richard J. LeBlanc, Jr. licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
           <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
             <em>Cepheus Engine System Reference Document</em></a>, 
           by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
+            <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
+          by Kevin Crawford ©2012, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
           </li>
         </ul>
         <div>We hope you enjoy! <p>The JTeam</p></div>
@@ -119,7 +149,19 @@
       <p>14.  Reformation: If any provision of this License is held to be  unenforceable, such provision shall be reformed only to the extent  necessary to make it enforceable.</p>
       <p>15.  COPYRIGHT NOTICE</p>
       <p>Open  Game License v 1.0a Copyright 2000, Wizards of the Coast, Inc.</p>
-      <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p><p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
+      <p>System Reference Document Copyright 2000-2003, Wizards of the Coast,
+         Inc.; Authors Jonathan Tweet, Monte Cook, Skip Williams, Rich Baker,
+         Andy Collins, David Noonan, Rich Redman, Bruce R. Cordell, John D.
+         Rateliff, Thomas Reid, James Wyatt, based on original material by E. Gary
+         Gygax and Dave Arneson.</p>
+         <p>Swords & Wizardry Core Rules, Copyright 2008, Matthew J. Finch</p>
+         <p>Swords & Wizardry Complete Rules, Copyright 2010, Matthew J. Finch</p>
+      <p>Old-School Adventures™
+         Accessory AX2: d30 Sandbox Companion,
+         Copyright © 2013, Richard J. LeBlanc, Jr./
+         New Big Dragon Games Unlimited</p>
+      <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
+      <p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
       <p>High  Guard System Reference Document Copyright © 2008, Mongoose  Publishing.</p>
       <p>Traveller is © 2008 Mongoose  Publishing. Traveller and related logos, character, names, and  distinctive likenesses thereof are trademarks of Far Future  Enterprises unless otherwise noted. All Rights Reserved. Mongoose  Publishing Ltd Authorized User.</p><p>Vehicle Handbook System Reference Document Copyright © 2012, Mongoose Publishing.</p>
       <button v-on:click="close" type="button" class="btn btn-info btn-lg btn-block">Close</button>
@@ -133,17 +175,6 @@
   <script type="text/javascript" src="src/lib/jquery.noty.packaged.min.js"></script>
   <script type="text/javascript" src="src/lib/chance.min.js"></script>
   <script type="text/javascript" src="src/lib/createjs-2015.11.26.min.js"></script>
-  <script type="text/javascript" src="src/app.js"></script>
-  <script type="text/javascript" src="src/encounters.js"></script>
-  <script type="text/javascript" src="src/starsystem.js"></script>
-  <script type="text/javascript" src="src/mainmenu.js"></script>
-  <script type="text/javascript" src="src/notify.js"></script>
-  <script type="text/javascript" src="src/page.js"></script>
-  <script type="text/javascript" src="src/fantasyplot.js"></script>
-  <script type="text/javascript" src="src/areabuilder.js"></script>
-  <script type="text/javascript" src="src/cepheussystem.js"></script>
-  <script type="text/javascript" src="src/pwdungeon.js"></script>
-  <script type="text/javascript" src="src/pandcgen.js"></script>
-  <script type="text/javascript" src="src/start.js"></script>
+  <script type="text/javascript" src="src/cpxu-1.1.min.js"></script>
 
 </html>

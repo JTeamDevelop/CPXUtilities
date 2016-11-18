@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript" src="src/lib/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
-  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-  <link rel="stylesheet" type="text/css" href="src/slider.css">
+  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="dev/slider.css">
   <link rel="stylesheet" type="text/css" href="dev/main.css">
 
 </head>
@@ -59,15 +59,25 @@
         </p>
         <strong>Current Utilities:</strong>
         <ul>
-          <li><strong>HexMap Builder</strong>
-          <p>Create your own hex based maps for your game.  Edit the terrain of individual hexes, and populate them
-          with cities, ruins, lairs, and more.
-          </p>
+          <li><strong>HexMap Editor</strong>
+            <p>Either generate a random hex map or build your own.   
+            Modify the terrain of individual hexes, and populate them with cities, ruins, lairs, and more.
+            </p>
+          </li>
           <li><strong>Fantasy Plot Generators</strong>
-          <p>Two different Random Plot Generators - one from the JTeam and the other from the 
-          <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Companion</a>.
-          Both create a number of adventure prompts. Each adventure has its own villain, plot, location and factions – all randomly generated.
-          </p>
+            <p>Two different Random Plot Generators: CPX and  
+            <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Companion</a>.
+            Both create a number of adventure prompts. Each adventure has its own villain, plot, location and factions – all randomly generated.
+            </p>
+          </li>
+          <li><strong>City/Stronghold Generator</strong>
+            <p>Four Generators:    
+              <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox City</a>, 
+              <a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">d30 Sandbox Stronghold</a>, 
+              <a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+              Perilous Wilds (Dungeon World)</a> Steading, and CPX City.  Provides population, tags, trouble, etc 
+              and all data is editable.  
+            </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
             Perilous Wilds</a> Dungeon Generator</strong>
@@ -76,17 +86,21 @@
             There are no grids here - pure theater of the mind.  
             <p>
           </li>
+          <li><strong>Generic Area Builder</strong>
+            <p>Create generic areas built from smaller zones.   
+            </p>
+          </li>
           <li><strong>People/Creature Generator</strong>
-          <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
-          No statistics are provided, but most will have special ability "tags" to make them unique. 
-          </p>
+            <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
+            No statistics are provided, but most will have special ability "tags" to make them unique. 
+            </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
             Traveller RPG</a> Star System Generator</strong>
             <p>Generates a random star system based upon tables found in the SRD.</p>
           </li>
         </ul>
-        <strong>This utility relies on the following sources:</strong> 
+        <strong>This utility relies data and rules from the following sources:</strong> 
         <ul>
           <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
             <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
@@ -96,6 +110,10 @@
             <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
           from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
           </li>
+          <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a>, 
+          by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
           <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
             <em>d30 Sandbox Companion</em></a>, 
           by Richard J. LeBlanc, Jr. licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
@@ -103,6 +121,10 @@
           <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
             <em>Cepheus Engine System Reference Document</em></a>, 
           by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
+            <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
+          by Kevin Crawford ©2012, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
           </li>
         </ul>
         <div>We hope you enjoy! <p>The JTeam</p></div>
@@ -133,6 +155,8 @@
          Andy Collins, David Noonan, Rich Redman, Bruce R. Cordell, John D.
          Rateliff, Thomas Reid, James Wyatt, based on original material by E. Gary
          Gygax and Dave Arneson.</p>
+         <p>Swords & Wizardry Core Rules, Copyright 2008, Matthew J. Finch</p>
+         <p>Swords & Wizardry Complete Rules, Copyright 2010, Matthew J. Finch</p>
       <p>Old-School Adventures™
          Accessory AX2: d30 Sandbox Companion,
          Copyright © 2013, Richard J. LeBlanc, Jr./
@@ -172,6 +196,7 @@
   <script type="text/javascript" src="dev/cpxcity.js"></script>
   <script type="text/javascript" src="dev/cepheussystem.js"></script>
   <script type="text/javascript" src="dev/pwdungeon.js"></script>
+  <script type="text/javascript" src="dev/swwilderness.js"></script>
   <script type="text/javascript" src="dev/pandcgen.js"></script>
   <script type="text/javascript" src="dev/start.js"></script>
 
