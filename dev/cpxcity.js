@@ -1,3 +1,6 @@
+/* Version 1.0
+*/
+
 CPX.data.cityExtras = ['school','barracks','fortified','market','militia','temple','guild','resource']
 
 CPX.city = function (opts){

@@ -41,7 +41,7 @@ CPX.hex.center = function (radius,hex,pointy) {
 }
 CPX.hex.mapBounds = function (map) {
   var mmin = CPX.hex.center(map._hexradius,{q:map.r,r:map.q},map._pointy);
-  var mmax = CPX.hex.center(map._hexradius,{q:map.r+map.width,r:map.q+map.height},map._pointy);
+  var mmax = CPX.hex.center(map._hexradius,{q:map.r+map.dw,r:map.q+map.dh},map._pointy);
   var span = {x:mmax.x-mmin.x+2*map._hexradius,y:mmax.y-mmin.y+2*map._hexradius};
 
   return span;

@@ -1,6 +1,11 @@
+/* Version 1.11
+ Last chainge: fix bounds calculation to remove error
+*/
+
 const HEXSITES = {
-  all: ['town','lair','natural','ruin','resource','other'],
+  all: ['town','stronghold','lair','natural','ruin','resource','other'],
   town:{class:['town'],color:'black'},
+  stronghold:{class:['stronghold'],color:'green'},
   ruin:{class:['ruin'],color:'grey'},
   natural:{class:['natural'],color:'blue'},
   resource:{class:['resource'],color:'yellow'},
@@ -21,6 +26,8 @@ CPX.rectHexArea = function (opts) {
     name : typeof opts.name === "undefined" ? '' : opts.name,
     notes : typeof opts.notes === "undefined" ? '' : opts.notes,
     opts:opts,
+    width:opts.width,
+    height:opts.height,
     selected: [],
     tokens: [],
     cells : {},
@@ -38,17 +45,24 @@ CPX.rectHexArea = function (opts) {
   Z.visible = 1;
   //push it to the map
   map.zones.push(Z);
-  //populate cells
-  CPX.rectHexArea.addCells(map);
   //setup the NEDB to hold the mods
   map.mods = new Nedb();
   map.mods.persistence.setAutocompactionInterval(120000);
+  //populate cells
+  CPX.rectHexArea.addCells(map);
+
   
   return map;
 }
 CPX.rectHexArea.addCells = function (map){
+  var w = map.opts.width, h = map.opts.height;
+  if(map.seed[0]=='CHM'){
+    w = map.width; 
+    h = map.height;
+  }
+  
   //r is for counting rows
-  var w= map.opts.width, h=map.opts.height, r=0, nid='', Z=map.zones[0];
+  var r=0, nid='', Z=map.zones[0];
   //loop though, floor on one side, ceiling on the other
   for(var j=-Math.floor(h/2);j<Math.ceil(h/2);j++){
     for(var i=-Math.floor(w/2)-Math.floor(r/2);i<Math.ceil(w/2)-Math.ceil(r/2);i++){
@@ -57,6 +71,16 @@ CPX.rectHexArea.addCells = function (map){
       if(!objExists(map.cells[nid])){
         map.cells[nid] = new HCell(i,j,map.opts.terrain,Z);
         Z.cells.push(nid);  
+        
+        //random hex map - note the increase in the map 
+        if(map.seed[0]=='CHM'){
+          if(w!=map.opts.width || h!=map.opts.height){
+            //set data othrwise it will not be passed correctly
+            var query = {_id:nid}, nt = {terrain:map.opts.terrain}; 
+            //pass data to mod db
+            CPX.hexMap.pushMod(map,{query:query,type:'set',data:nt}); 
+          }
+        }
       }
     }
     //increase the count
@@ -94,15 +118,27 @@ CPX.rectHexArea.mapClick = function (e){
 Vue.component('c-cha-site', {
   props:['site','ids'],
   template: ''+
-  '<div class="center">'+
-    '<select class="form-control half" v-model="site.class[0]" @change="mod">'+
+  '<div class="input-group strong">'+
+    '<input class="form-control" type="text" v-model="site.name" placeholder="NAME">'+
+    '<span class="input-group-btn">'+
+      '<button v-on:click="removeSite" type="button" class="btn"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>'+
+    '</span>'+
+  '</div>'+
+  '<div class="input-group strong" >'+
+    '<span class="input-group-addon strong">Type</span>'+
+    '<select class="form-control" v-model="site.class[0]" @change="mod">'+
       '<option class="center" v-for="site in hexsites.all" v-bind:value="site">{{site | capitalize}}</option>'+
     '</select>'+
-    '<button v-on:click="removeSite" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>'+
+    '<span class="input-group-addon strong">Size</span>'+
+    '<select class="form-control" v-model="site.size" @change="mod" v-if="site.class[0]==`town`">'+
+      '<option class="center" v-for="size in citysize" v-bind:value="$index">{{size | capitalize}}</option>'+
+    '</select>'+
+    '<input class="form-control" type="number" v-model="site.size" v-else>'+
   '</div>',
   data: function(){
     return {
-      hexsites: HEXSITES
+      hexsites: HEXSITES,
+      citysize : CPX.CFP.citysizes
     }
   },
   methods: {
@@ -124,7 +160,7 @@ Vue.component('c-cha-site', {
 Vue.component('c-cha-cell', {
   props:['cell','mid'],
   template: ''+
-  '<div class="box">'+
+  '<div class="box content-minor">'+
     '<h4 class="center header">{{cell.name}}</h4>'+
     '<input class="form-control center" type="text" v-model="cell.name" placeholder="NAME" @change="mod(`name`)">'+
     '<textarea class="form-control" type="textarea" v-model="cell.notes" placeholder="ADD NOTES" @change="mod(`notes`)"></textarea>'+
@@ -132,7 +168,7 @@ Vue.component('c-cha-cell', {
       '<button v-on:click="addSite" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+
     '</h4>'+
     '<c-cha-site v-for="site in cell.special" v-bind:site="site" v-bind:ids="{mid:mid,cid:cell.id,i:$index}"></c-cha-site>'+
-  '</div>',
+  '</div>', 
   data: function(){
     return {
 
@@ -167,18 +203,12 @@ Vue.component('c-cha', {
       <c-loadselect id="CHA" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
       <div class="center content-minor">\
         <div class="btn-group" role="group" aria-label="...">\
-          <button v-on:click="build" type="button" class="btn btn-info">Build Your Own</button>\
-          <button v-on:click="random" type="button" class="btn btn-info">Random Hex Area</button>\
+          <button v-on:click="buildShow" type="button" class="btn btn-info">Build Your Own</button>\
+          <button v-on:click="randomShow" type="button" class="btn btn-info">Random Hex Area</button>\
         </div>\
       </div>\
       <div class="input-group strong" v-show="showlist.globalTerrain">\
-        <span class="input-group-addon strong">Pop Density</span>\
-        <select class="form-control" v-model="popdensity">\
-          <option v-for="d in desnities" v-bind:value="$index">{{d | capitalize}}</option>\
-        </select>\
-      </div>\
-      <div class="input-group strong" v-show="showlist.globalTerrain">\
-        <span class="input-group-addon strong">Global Terrain</span>\
+        <span class="input-group-addon strong">Terrain</span>\
         <select class="form-control" v-model="dataterrain">\
           <option v-for="t in terrains" v-bind:value="$index">{{t | capitalize}}</option>\
         </select>\
@@ -186,7 +216,22 @@ Vue.component('c-cha', {
           <button v-on:click="globalTerrain" type="button" class="btn strong">Change</button>\
         </span>\
       </div>\
-      <div class="center">\
+      <div class="input-group strong" v-show="showlist.makegen">\
+        <span class="input-group-addon strong" >Pop Density</span>\
+        <select class="form-control" v-model="popdensity">\
+          <option v-for="d in desnities" v-bind:value="$index">{{d | capitalize}}</option>\
+        </select>\
+      </div>\
+      <div class="input-group strong" v-show="showlist.makegen">\
+        <span class="input-group-addon strong">Width</span>\
+        <input class="form-control center" type="number" v-model="width" min=10">\
+        <span class="input-group-addon strong">Height</span>\
+        <input class="form-control center" type="number" v-model="height" min=10">\
+      </div>\
+      <div class="center" v-show="showlist.make">\
+        <button v-on:click="make" type="button" class="btn btn-info strong">Generate Map</button>\
+      </div>\
+      <div class="center" v-show="showlist.addcells">\
         <div class="btn-group" role="group" aria-label="...">\
           <button v-on:click="addCells(`w`)" type="button" class="btn strong">\
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Width\
@@ -196,15 +241,15 @@ Vue.component('c-cha', {
           </button>\
         </div>\
       </div>\
-      <div class="content-minor">\
-        <input class="form-control input-lg center" type="text" v-model="map.name" placeholder="NAME">\
-        <textarea class="form-control pad-y" type="textarea" v-model="map.notes" placeholder="ADD NOTES"></textarea>\
+      <div class="content" v-show="hasmap">\
+        <input class="form-control center" type="text" v-model="map.name" placeholder="NAME">\
+        <textarea class="form-control" type="textarea" v-model="map.notes" placeholder="Notes"></textarea>\
       </div>\
     </div>\
     <c-cha-cell v-for="cid in map.selected" v-bind:cell="map.cells[cid]" v-bind:mid="map._id"></c-cha-cell>\
   </div>\
   <div id="{{map._id}}" class="map active" v-bind:class="front" v-show="showlist.map">\
-    <canvas width="{{map.bounds.x}}" height="{{map.bounds.y}}"></canvas></div>\
+    <canvas width="{{bounds.x}}" height="{{bounds.y}}"></canvas></div>\
   <div class="footer box strong slim">\
     <div class="center">\
       <div class="btn-group" role="group" aria-label="...">\
@@ -230,6 +275,7 @@ Vue.component('c-cha', {
   data: function () {
     return {
       vid: 'CHA',
+      loadids: ['CHA','CHM'],
       showmenu:{
         new:true,
         load:true,
@@ -239,11 +285,15 @@ Vue.component('c-cha', {
       showlist: {
         load:false,
         map:true,
+        make:false,
         changeTerrain:false,
-        globalTerrain: true,
+        globalTerrain: false,
+        addcells:false,
+        makegen:false,
         minimal:false,
         paint:false,
       },
+      type:'',
       front:'back',
       desnities : CPX.CFP.densities,
       popdensity : 0,
@@ -252,8 +302,8 @@ Vue.component('c-cha', {
       palette: -1,
       dataterrain: 0,
       seed:[],
-      width:7,
-      height:7,
+      width:12,
+      height:12,
       map: {},
       allgens: {}
     }
@@ -266,12 +316,37 @@ Vue.component('c-cha', {
     CPX.vue.page.onBeforeDestroy(this);
   },
   computed: {
+    bounds : function(){
+      if(this.hasmap){
+        return this.map.bounds;
+      }
+      else { return {x:0,y:0}; } 
+    },
+    hasmap: function(){
+      return objExists(this.map.cells);
+    },
     isMinimal:function(){
       if(this.showlist.minimal){return 'glyphicon-plus';}
       return 'glyphicon-minus';
     }
   },
   methods: {
+    make:function(){
+      this[this.type]();
+    },
+    buildShow:function(){
+      this.new();
+      this.type='build';
+      this.showlist.globalTerrain = true;
+      this.showlist.make = true;
+    },
+    randomShow:function(){
+      this.new();
+      this.type='random';
+      this.showlist.makegen = true;
+      this.showlist.globalTerrain = true;
+      this.showlist.make = true;
+    },
     globalTerrain:function(){
       for(var x in this.map.cells){
         if(this.map.cells[x].terrain == this.map.opts.terrain){
@@ -283,12 +358,19 @@ Vue.component('c-cha', {
     },
     //increase the cells
     addCells:function(type){
-      //width
-      if(type=='w'){this.map.opts.width++;}
-      //height
-      else {this.map.opts.height++;}
-      //increase the number of cells
-      var w= this.map.opts.width, h=this.map.opts.height, nid='';
+      if(this.map.seed[0]=='CHA'){
+        //width
+        if(type=='w'){this.map.opts.width++;}
+        //height
+        else {this.map.opts.height++;}
+      }
+      else{
+        //width
+        if(type=='w'){this.map.width++;}
+        //height
+        else {this.map.height++;}
+      }
+      
       //addcell function
       CPX.rectHexArea.addCells(this.map);
       //update after vue/canvas has been updated
@@ -329,11 +411,20 @@ Vue.component('c-cha', {
     },
     load: function (M) {
       //clear the old map display so clicks register
-      CPX.display.clearActive(this.map);
+      this.new();
+      this.showlist.addcells = true;
       //copy the opts
       var VU=this, opts = M;
       //make map
-      CPXDB[M._id] = CPX.rectHexArea(opts);
+      if(opts.seed[0]=='CHM'){
+        CPXDB[M._id] = CPX.hexMapGen(opts);  
+      }
+      else{
+        CPXDB[M._id] = CPX.rectHexArea(opts);
+        this.showlist.globalTerrain = true;
+        this.showlist.changeTerrain = true;
+      }
+      
       CPXDB[M._id].VU = this;
       this.seed = opts.seed;
       //apply mods
@@ -351,8 +442,12 @@ Vue.component('c-cha', {
       }
     },
     new : function () {
-      this.showlist.globalTerrain = true;
+      this.type='';
+      this.showlist.globalTerrain = false;
+      this.showlist.make = false;
+      this.showlist.makegen = false;
       this.showlist.changeTerrain = false;
+      this.showlist.addcells = false;
       if(objExists(this.map.display)){
         //clear the old map display so clicks register
         CPX.display.clearActive(this.map);
@@ -361,11 +456,14 @@ Vue.component('c-cha', {
     },
     random: function () {
       this.new();
-      this.showlist.globalTerrain = false;
+      this.showlist.addcells = true;
       this.seed = ['CHM','-',CPXC.string({length: 27, pool: base62})];
       CPXDB[this.seed.join('')] = this.map = CPX.hexMapGen({
         seed:this.seed,
-        terrain: this.dataterrain
+        terrain: this.dataterrain,
+        width:this.width,
+        height:this.height,
+        density: this.popdensity
       });
       //reference
       this.map.VU = this;
@@ -374,15 +472,15 @@ Vue.component('c-cha', {
     },
     build: function () {
       this.new();
+      this.showlist.addcells = true;
+      this.showlist.globalTerrain = true;
       this.showlist.changeTerrain = true;
-      this.width = 7; 
-      this.height = 7;
       this.seed = ['CHA','-',CPXC.string({length: 27, pool: base62})];
       
       CPXDB[this.seed.join('')] = this.map = CPX.rectHexArea({
         seed:this.seed,
-        width:this.width,
-        height:this.height,
+        width:7,
+        height:7,
         terrain: this.dataterrain
       });
       //reference

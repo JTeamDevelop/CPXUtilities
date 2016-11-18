@@ -1,3 +1,8 @@
+/* Version 1.21
+  Last Update: changed how type is calculate for sub components
+  fixed fragment warnings
+*/
+
 //Fantasy plot Object
 //Contains basic data to be randomly selected
 CPX.FP = {};
@@ -223,25 +228,29 @@ Vue.component('c-factions', {
             '<div v-if="f.special.length>0"><strong>Tags:</strong> {{f.special.unique().join(`, `) | capitalize }}</div></li></ul></div>' 
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-fpg-cfp', {
+Vue.component('c-fpg-FPG', {
   props: ['A','idx'],
   template: '\
-  <div class="content"><input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
-  <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea></div>\
-  <c-fpg-villain v-bind:V="A.villain"></c-fpg-villain>\
-  <div><strong>Plot:</strong> {{A.plot}}</div>\
-  <div><strong>Doom:</strong> {{A.villain.doom[0]}} ({{A.villain.doom[1]}})</div>\
-  <div><strong>Location:</strong> {{A.location}}</div>\
-  <c-factions v-bind:factions="A.factions"></c-factions>\
-  <div v-if="idx>1"><strong>Twist:</strong> {{A.twist}}</div>\
-  <div v-if="idx==0"><strong>Hook:</strong> {{A.hook}}</div>\
-  <div v-if="idx==0"><strong>Supporting Cast: </strong><ul><li v-for="c in A.cast">{{c}}</li></ul></div>\
+  <div class="content-minor">\
+    <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
+    <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
+    <c-fpg-villain v-bind:V="A.villain"></c-fpg-villain>\
+    <div><strong>Plot:</strong> {{A.plot}}</div>\
+    <div><strong>Doom:</strong> {{A.villain.doom[0]}} ({{A.villain.doom[1]}})</div>\
+    <div><strong>Location:</strong> {{A.location}}</div>\
+    <c-factions v-bind:factions="A.factions"></c-factions>\
+    <div v-if="idx>1"><strong>Twist:</strong> {{A.twist}}</div>\
+    <div v-if="idx==0"><strong>Hook:</strong> {{A.hook}}</div>\
+    <div v-if="idx==0"><strong>Supporting Cast: </strong>\
+        <ul><li v-for="c in A.cast">{{c}}</li></ul>\
+    </div>\
+  </div>\
   '
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Standard adventure display
 Vue.component('c-fpg-result', {
-  props: ['A','idx','allgens','type'],
+  props: ['A','idx','allgens'],
   template: '\
   <h4 class="header">\
     <div class="btn-group" role="group" aria-label="...">\
@@ -259,6 +268,12 @@ Vue.component('c-fpg-result', {
   </div>\
   ',
   computed: {
+    type: function(){
+      if(objExists(this.A)){
+        return 'c-fpg-'+this.A.seed[0];  
+      }
+      else { return 'c-fpg-FPG'; }
+    },
     header: function(){
       if(this.idx==0) {return 'Central Plot'; }
       return 'Adventure';
@@ -297,7 +312,7 @@ Vue.component('c-fpg', {
     </div>\
     <button v-show="content.length>0" v-on:click="add" type="button" class="btn btn-info">Add New Adventure To Arc</button>\
   </div>\
-  <c-fpg-result v-for="A in content" v-bind:type="advType" v-bind:A="A" v-bind:idx="$index" v-bind:allgens="allgens"></c-fpg-result>\
+  <c-fpg-result v-for="A in content" v-bind:A="A" v-bind:idx="$index" v-bind:allgens="allgens"></c-fpg-result>\
 ',
   data: function () { 
     return {
@@ -309,7 +324,6 @@ Vue.component('c-fpg', {
         save:true,
         close:true
       },
-      advType:'',
       showlist: {load:false},
       content: [],
       allgens: {}
@@ -325,8 +339,11 @@ Vue.component('c-fpg', {
     HUB.$off('FPG-move', this.move);
   },
   methods: {
-    add: function() {
-      if(this.advType == 'c-fpg-cfp'){
+    add: function(type) {
+      if(this.content.length>0){
+        type = this.content[0].seed[0];
+      }
+      if(type == 'FPG'){
         this.content.push(CPX.FP.Adventure({
           seed:['FPG','-',CPXC.string({length: 27, pool: base62})]
         }));
@@ -357,35 +374,21 @@ Vue.component('c-fpg', {
       }
     },
     load: function (A) {
-      if(A.arc[0]._id.includes('FPG-')){
-        if(this.advType=='' || this.advType == 'c-fpg-cfp'){
-          this.advType = 'c-fpg-cfp';
-          this.content = A.arc.concat(this.content);
-        }
-      }
-      else {
-        if(this.advType=='' || this.advType == 'c-sag-adv'){
-          this.advType = 'c-sag-adv';
-          this.content = A.arc.concat(this.content);
-        }
-      }
+      this.content = A.arc.concat(this.content);
     },
     JTF : function (){
       this.content = [];
-      this.advType = 'c-fpg-cfp';
       for(var i=0;i<4;i++){
-        this.add();
+        this.add('FPG');
       }
     },
     d30S : function (){
       this.content = [];
-      this.advType = 'c-sag-adv';
       for(var i=0;i<4;i++){
-        this.add();
+        this.add('SAG');
       }
     },
     new : function () { 
-      this.advType = '';
       this.content = [];
     },
     generate: function () {

@@ -1,8 +1,14 @@
+/* Version 1.11
+  Last Update: changed how type is calculate for sub components
+  fixed fragment warnings
+*/
+
 CPX.CFP = {
   densities: ['dense','scattered','frontier','unsettled','desolate'],
+  citysizes : ['single dwelling','thorp','hamlet','village','town, small',
+  'town, large','city, small','city, large','metropolis, small','metropolis, large'],
   habitation: ['uninhabited','single dwelling','thorp','hamlet','village','town, small',
-  'town, large','city, small','city, large','metropolis, small','metropolis, large',
-  'stronghold','temple','ruin','special'],
+  'town, large','city, small','city, large', 'stronghold','temple','ruin','special'],
   special: {
     water: 'achored boat', 
     "swamp": 'unihabited',
@@ -13,8 +19,8 @@ CPX.CFP = {
     "mountain": 'mine'
   },
   dense:{
-    items: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
-    p: [3,3,3,2,2,1,1,2,2,1,3,3,2,1],
+    items: [1,2,3,4,5,6,7,8,9,10,11,12],
+    p: [4,3,3,2,2,1,1,3,3,3,2,1],
     special:{
       items: ['manor','peasant long house','orphanage','traders’ village','mill',
         'military barracks','church','chapterhouse','bath house','alehouse/tavern/inn'],
@@ -22,8 +28,8 @@ CPX.CFP = {
     }
   },
   scattered:{
-    items: [0,1,2,3,4,5,6,7,8,11,12,13,14],
-    p: [5,6,3,3,2,2,1,1,1,2,2,1,1],
+    items: [0,1,2,3,4,5,6,7,9,10,11,12],
+    p: [5,7,3,3,2,2,1,1,2,2,1,1],
     special:{
       items: ['manor','farmstead','farmstead','migrant camp','mill','military structure',
       'abbey', 'priory','nunnery','bath house','inn'],
@@ -31,7 +37,7 @@ CPX.CFP = {
     }
   },
   frontier:{
-    items: [0,1,2,3,4,5,6,11,12,13,14],
+    items: [0,1,2,3,4,5,6,9,10,11,12],
     p: [10,3,3,2,2,2,1,1,1,4,1],
     special:{
       items: ['manor','trading outpost','military outpost','military camp','work camp',
@@ -40,7 +46,7 @@ CPX.CFP = {
     }
   },
   unsettled:{
-    items: [0,1,2,3,4,5,13,14],
+    items: [0,1,2,3,4,5,11,12],
     p: [13,6,2,2,2,1,3,1],
     special:{
       items: ['hermit','trading outpost','military outpost','military camp','work camp',
@@ -49,7 +55,7 @@ CPX.CFP = {
     }
   },
   desolate:{
-    items: [0,1,2,3,13],
+    items: [0,1,2,3,11],
     p: [23,2,1,1,3],
     special:{
       items: ['abandoned/forgotten tower','abandoned/forgotten castle/fortress',
@@ -255,8 +261,8 @@ Vue.component('c-cfp-ppl', {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-cfp-30S', { 
 props:['obj'],
-template: ''+
-  '<div class="content">'+
+template: 
+  '<div class="content-minor">'+
     '<input class="form-control input-lg center" type="text" v-model="obj.name" placeholder="NAME">'+
     '<textarea class="form-control" type="textarea" v-model="obj.notes" placeholder="ADD NOTES"></textarea>'+
     '<div class="input-group">'+
@@ -281,7 +287,7 @@ template: ''+
 Vue.component('c-cfp-30C', { 
 props:['obj'],
 template: ''+
-  '<div class="content">'+
+  '<div class="content-minor">'+
     '<input class="form-control input-lg center" type="text" v-model="obj.name" placeholder="NAME">'+
     '<textarea class="form-control" type="textarea" v-model="obj.notes" placeholder="ADD NOTES"></textarea>'+
     '<div class="content-minor box">'+
@@ -312,15 +318,20 @@ template: ''+
 Vue.component('c-cfp-result', { 
   props:['obj','idx','allgens'],
   template: ''+
-  '<h4 class="center header">'+
-    '{{obj.name}} {{obj.class[1] | capitalize}}'+
-    '<button v-on:click="remove" type="button" class="close"><span aria-hidden="true">&times;</span></button>'+
-  '</h4>'+
-  '<component v-bind:is="type" v-bind:obj="obj" v-bind:idx="idx"></component>'+
-  '<button v-on:click="save" type="button" class="btn btn-info btn-block bottom-pad">Save</button>',
+  '<div>'+
+    '<h4 class="center header">'+
+      '{{obj.name}} {{obj.class[1] | capitalize}}'+
+      '<button v-on:click="remove" type="button" class="close"><span aria-hidden="true">&times;</span></button>'+
+    '</h4>'+
+    '<button v-on:click="save" type="button" class="btn btn-info btn-block bottom-pad">Save</button>'+
+    '<component v-bind:is="type" v-bind:obj="obj" v-bind:idx="idx"></component>'+
+  '</div>',
   computed: {
     type: function(){
-      return 'c-cfp-'+this.obj.seed[0];
+      if(objExists(this.obj)){
+        return 'c-cfp-'+this.obj.seed[0];  
+      }
+      else { return 'c-cfp-30S'; }
     }
   },
   methods:{

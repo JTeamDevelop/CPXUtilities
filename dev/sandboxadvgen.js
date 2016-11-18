@@ -1,3 +1,8 @@
+/* Version 1.11
+  Last Update: changed name of component to match seed 
+  - fixed vue fragment warnings by adding div
+*/
+
 var SAG = {
   trigger : ['accusation','ambush','apparition','attack','conversation','destruction of object',
   'diary','drawing','dream','encounter w/ NPC','escape','manuscript','map','message','item, exotic',
@@ -74,18 +79,20 @@ SAG.adventure = function(opts){
   return A;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-sag-adv', { 
+Vue.component('c-fpg-SAG', { 
   props: ['A','idx'],
   template: '\
-  <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
-  <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
-  <div class="input-group ">\
-    <span class="input-group-addon strong">Villain Reason</span>\
-    <input class="center form-control" type="text" v-model="A.vreason">\
-  </div>\
-  <div v-for="key in keys" class="input-group ">\
-    <span class="input-group-addon strong">{{key | capitalize}}</span>\
-    <input class="center form-control" type="text" v-model="A[key]">\
+  <div class="content-minor">\
+    <input class="form-control input-lg center" type="text" v-model="A.name" placeholder="NAME">\
+    <textarea class="form-control" type="textarea" v-model="A.notes" placeholder="ADD NOTES"></textarea>\
+    <div class="input-group ">\
+      <span class="input-group-addon strong">Villain Reason</span>\
+      <input class="center form-control" type="text" v-model="A.vreason">\
+    </div>\
+    <div v-for="key in keys" class="input-group ">\
+      <span class="input-group-addon strong">{{key | capitalize}}</span>\
+      <input class="center form-control" type="text" v-model="A[key]">\
+    </div>\
   </div>\
   ',
   data: function(){

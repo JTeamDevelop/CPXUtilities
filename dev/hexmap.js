@@ -18,6 +18,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+V 1.2.1
+Recalculate map bounds after doing mod update
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,10 +149,20 @@ CPX.hexMap.applyMods = function (map) {
           map.cells[el._id][x] = el[x];
         }
       }
+      //if an id that isn't currently part of the cells
+      else if (el._id.includes('_')){
+        //get the coords
+        var qr = CPX.hex.cellQR(el._id);
+        //make the new cells
+        map.cells[el._id] = new HCell(qr.q,qr.r,map.opts.terrain,map.zones[0]);
+        map.zones[0].cells.push(el._id);
+      }
       else {
         map[el._id] = el.val;
       }
     })
+    //update bounds
+    CPX.hexMap.bounds(map);
     resolve(map);
   });
 }
@@ -249,11 +261,12 @@ CPX.hexMap.bounds = function (map) {
 
   map.q = qmin;
   map.r = rmin;
-  map.width = Math.abs(qmax-qmin);
-  map.height = Math.abs(rmax-rmin);
+  //display height and width
+  map.dw = Math.abs(qmax-qmin);
+  map.dh = Math.abs(rmax-rmin);
   map.center = {
-    q:qmin+map.width/2,
-    r:rmin+map.height/2
+    q:qmin+map.dw/2,
+    r:rmin+map.dh/2
   };
 
   map.bounds = CPX.hex.mapBounds(map);

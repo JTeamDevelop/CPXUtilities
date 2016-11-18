@@ -1,3 +1,4 @@
+//Version 1.1
 //core object for Cosmic Power utilities
 const CPX = {
   display:{},
@@ -13,6 +14,8 @@ const CPXSAVE = localforage.createInstance({ name: "CPXSave", storeName: "CPXsav
 const CPXDB = {};
 //Object declaration for the global Random NUmber generator - to be populated later
 var CPXC;
+//Provide data shortcut
+DATA = CPX.data;
 //Base character list for UID determination
 const base62 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 //Named rarity ranks

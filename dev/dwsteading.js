@@ -1,3 +1,6 @@
+/* Version 1.0
+*/
+
 CPX.data.DWSteadings = {
   basic : ['village','town','keep','city'],
   bp : [5,3,3,1],

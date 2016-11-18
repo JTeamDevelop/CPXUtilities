@@ -1,10 +1,21 @@
+CPX.data.mapResources = ['Fertile Land', 'Lush Pasture','Good Fishing', 'Medicinal Plants', 'Good Hunting',
+'Old Industry', 'Good Mine', 'Rich Gathering', 'Good Timber', 'Magical Materials'];
+CPX.data.mapLairs = [
+  'Ancient Evil', 'Magical Gate', 'Ancient Fort', 'Dark Elves/Fae', 'Aspiring Warlord',
+  'Monster Nest', 'Bandit Camp', 'Renegade Outpost','Tainted Elemental','School of Dark Sorcery',
+  'Dragon','Vicious Humanoids','Cursed Earth','Splinter Faction','Outsiders',
+  "Thieves' Stronghold",'Deep Dwarves','Undead','Mad Wizard'
+];
+
 CPX.hexMapGen = function (opts) {
-  opts.width = 24;
-  opts.height = 24;
   var map = CPX.rectHexArea(opts);
   map.class = ['hexMapGen'].concat(map.class);
+  //record density
+  map.density = opts.density
+  //gen terrain
   CPX.hexMapGen.terrain(map);
-  
+  //gen pop
+  CPX.hexMapGen.pop(map);
   //identify bounds for display
   CPX.hexMap.bounds(map);
   
@@ -82,4 +93,69 @@ CPX.hexMapGen.terrain = function(map){
     makeTerrain(rn,map.RNG.pickone(nw));
     n-=rn;
   }
+}
+//GVenerate the population
+CPX.hexMapGen.pop = function (map){
+  var CFP = CPX.CFP, dtxt = CFP.densities[map.density],
+  density = CFP[dtxt], pid=-1, c='', name='', size=0, n=0; 
+  
+  for(var x in map.cells){
+    //pop cance is 33%
+    if(map.RNG.bool({likelihood:33})){
+      //pick the pop id based upon the desnity of the map
+      pid = map.RNG.weighted(density.items,density.p);
+      //only if the id is greater tan 0, 0 is no pop
+      if (pid>8){
+        size = map.RNG.weighted([2,3,4,5],[3,6,2,1]);
+        if(['ruin','stronghold'].includes(CFP.habitation[pid])){
+          c = CFP.habitation[pid];
+          name = '';
+        }
+        else {
+          name = CFP.habitation[pid];
+          c='other';
+        }
+        map.cells[x].special.push({
+          name: name,
+          class:[c],
+          size: size
+        })
+      }
+      else if(pid>0){
+        //count locations bigger than thorp
+        if(pid>2){n++;}
+        //push a town of the size to the cell, size relative to index pid-1
+        map.cells[x].special.push({
+          class:['town'],
+          size: pid-1
+        })  
+      }
+    }
+  }
+  
+  var id=-1, cr = CPX.cellArray(map), cl = CPX.cellArray(map), cid='';
+  for(var i=0;i<n;i++){
+    cid = map.RNG.pickone(cr);
+    id = map.RNG.pickone(CPX.data.mapResources);
+    map.cells[cid].special.unshift({
+      name: id,
+      class:['resource'],
+      type: CPX.data.mapResources.indexOf(id)
+    })
+    
+    cr.splice(cr.indexOf(cid),1);
+    cid = map.RNG.pickone(cl);
+    id = map.RNG.pickone(CPX.data.mapLairs);
+    map.cells[cid].special.push({
+      name: id,
+      class:['lair'],
+      type: CPX.data.mapLairs.indexOf(id)
+    })
+    cl.splice(cl.indexOf(cid),1);
+  }
+
+}
+//direct the click
+CPX.hexMapGen.mapClick = function (e){
+  CPX.rectHexArea.mapClick(e);
 }
