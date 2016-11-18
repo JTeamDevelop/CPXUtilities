@@ -53,24 +53,33 @@ this page you will delete this data (so beware).
             Traveller RPG</a> Star System Generator</strong>
             <p>Generates a random star system based upon tables found in the SRD.</p>
           </li></ul>
-<strong>This utility relies on the following sources:</strong> 
-<ul>
-<li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
-<em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
-licensed under a Creative Commons Attribution 3.0 Unported license.
-</li>
-<li><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
-<em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
-from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
-</li>
-<li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
-<em>d30 Sandbox Companion</em></a>, by Richard J. LeBlanc, Jr. licensed under the 
-<span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
-</li>
-<li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
-<em>Cepheus Engine System Reference Document</em></a>, 
-by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
-</li>
-</ul>
+<strong>This utility relies data and rules from the following sources:</strong> 
+        <ul>
+          <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
+            <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
+          licensed under a Creative Commons Attribution 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+            <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
+          from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a>, 
+          by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
+            <em>d30 Sandbox Companion</em></a>, 
+          by Richard J. LeBlanc, Jr. licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            <em>Cepheus Engine System Reference Document</em></a>, 
+          by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
+            <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
+          by Kevin Crawford ©2012, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+        </ul>
+        
 We hope you enjoy! 
 <p>The JTeam</p>
