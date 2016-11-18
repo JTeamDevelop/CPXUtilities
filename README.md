@@ -1,5 +1,5 @@
 # CPXUtilities
-Cosmic Powered RPG Utulities - https://jteamdevelop.github.io/CPXUtilities/
+Cosmic Powered RPG Utilities - https://jteamdevelop.github.io/CPXUtilities/
 
 All the code to this is released open source under the GNU General Public License v3.0.
 <p><strong><em>This is free because the grace of God is free through His son Jesus.</em></strong></p>
