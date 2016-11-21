@@ -227,6 +227,9 @@ function refreshRNG(callback){
 
 //global start function - given a callback once finished.  
 function start(f) {
+  CPX.SW.mdbBuild().then(function(res){
+    console.log(res);
+  });
   refreshRNG(f);
 }
 

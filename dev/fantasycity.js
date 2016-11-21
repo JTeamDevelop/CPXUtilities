@@ -311,7 +311,7 @@ template: ''+
       keys : ['economy','taxes','issue','idegree','threat'],
       titles : ['economy','taxes','issue','Issue Degree','threat'],
       govt: CPX.CFP.govt
-    }
+    } 
   }
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
