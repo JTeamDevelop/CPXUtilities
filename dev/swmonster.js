@@ -12,19 +12,24 @@ CPX.data.SWMonsters = {
       '-2 Attack bonus'
     ],
     1 : [
-      '4+ attacks per round (minimum d6 or saving throw each)',
-      'AC 0 [19] or better',
+      'Breath weapon',
+      'Magic resistance',
+      'MultiAttack',
+      'highAC',
       'Automatic damage after hit',
-      'Breath weapon 25 points max or below',
       'Disease',
+      'Mimic',
+      'Invisibility',
       'Flies', 
       'Breathes water',
+      'Ruinous - once a fight, save or ruin an item, weapon or armor',
+      'Open wound - on a hit, monster does 1d6 damage next round, too',
       'Greater than human intelligence',
       'Immune to blunt/piercing weapons',
       'Half damage from blunt/piercing weapons',
       'Immune',
+      'Teleporter - can teleport base movement',
       'Immune to non-magic weapons',
-      'Magic resistance 50% or below',
       'Massive attack for 20+ hps',
       'Paralysis', 
       'Swallows whole',
@@ -35,49 +40,59 @@ CPX.data.SWMonsters = {
       '+2 Attack bonus',
     ],
     2: [
-      'Breath Weapon 26 points max or more',
+      'Breath weapon',
+      'Magic resistance',
       'Drains level with save',
-      'Magic resistance higher than 50%',
       'Petrifaction', 
       'Poison', 
-      'Death magic',
+      'Instant Death Attack',
       'Uses a spell-like power level 3 equivalent or above',
       'Uses multiple spells level 3 or above'
-      
     ],
     3: [
       'Drains level with no save',
       'Uses multiple spells level 5 or above'
     ],
-    bw: ['1d6','1d8','1d10','2d6','2d8','3d6','2d10','3d8','4d6'],
-    bw2 : ['5d6','4d8','3d10','6d6']
-  },
-  CR: {
-    A : [],
-    B : [],
-    C : [],
-    1 : []
-  },
-  Animals : ['Gorilla','Baboon','Bears','Boars','Frogs','Lions','great cat','Lizards',
-    'Snakes','Wolf','great dog'],
-  Bugs : ['Ant','Beetle','Centipede','Scorpion','Spiders'],
-  Dragon : [['Basilisk'],['Black Dragon','1d4'],['Black Dragon','2d4'],['Black Dragon','1d8'],['Blue Dragon','1d4'],
-    ['Blue Dragon','2d4'],['Blue Dragon','1d8'],['Cockatrice'],['Green Dragon','1d4'],['Green Dragon','2d4'],
-    ['Green Dragon','1d8'],['Hydra'],['Red Dragon','1d4'],['Red Dragon','2d4'],['Red Dragon','1d8'],['Wyvern']],
-  'Flying' :['Chimerae','Djinni','efreet','Gargoyles','Griffons','Harpies','Hippogriffs','Manticores',
-    'Normal Birds (flock)','Ogre Mage','Pegasi','Rocs','Stirges','Giant bat','Wyverns'],
-  'Monsters' : ['Behir','Rhemoraz','Bulette'],
-  'Aberrant' : ['Roper','Orb of Eyes','Aboleth'],
-  'Humankind':['Adventurers','Bandits','Berserkers','Brigands','Caravan','Cavemen','Dwarves','Elves','Patrol',
-    'Pilgrims','Priests of Chaos','Wizard'],
-  'Chimerae': ['Cockatrice','Chimerae','Medusa','Minotaur','Owlbear','Purple Worm','Treant','Werebear','Wereboar',
-    'Weretiger','Werewolve','Griffons','Harpies','Hippogriffs','Manticores'],
-  'Were': ['Werebear','Wereboar','Weretiger','Werewolve'],
-  'Swimming':['Crocodile, giant', 'Dragon Turtle', 'Fish, giant','Leeches, giant','Mermen','Nixie',
-    'Octopus, giant','Sea Monster','Naga, water','Sea Serpent','Squid, giant'],
-  'Undead':['Ghouls','Mummies','Skeletons','Spectres','Vampires','Wights','Wraiths','Zombies'],
-  Humanoids: ['Kobolds','Goblins','Orcs','Bugbears','Gargoyles','Lizardmen','Hobgoblins','Gnolls','Ogres','Trolls'],
-  'Giant-kin' : ['Ogres','Trolls','Giant, Hill','Giant, Cloud','Giant, Fire','Giant, Stone','Giant, Storm','Giant, Frost']
+    highAC: [
+      [19,20,21,22,23,24,25],
+      [5,4,3,2,1,0.5,0.25]
+    ],
+    bw: ['2d6','2d8','3d6','2d10','3d8','4d6'],
+    bw2 : ['5d6','4d8','3d10','6d6'],
+    element : ["air","earth","fire","water",'ice','lightning','poison',"life","death"],
+    magic : ["divination","enchantment","evocation",'abjuration','conjuration',"illusion","necromancy","summoning"],
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.SW.randomMod = function(being){
+  var n =1;
+  var mod = CPXC.pickone(CPX.data.SWMonsters.mods[n]);
+  
+  if(mod = 'MultiAttack'){
+    
+  }
+  
+  if(mod = 'highAC'){
+    being.AAC = CPXC.weighted(CPX.data.SWMonsters.highAC[0],CPX.data.SWMonsters.highAC[1])
+  }
+  
+  if(mod = 'Breath weapon'){
+    if(n==1){
+      mod+= ' (' + CPXC.pickone(CPX.data.SWMonsters.bw) + ')';
+    }
+    else {
+      mod+= ' (' + CPXC.pickone(CPX.data.SWMonsters.bw2) + ')';
+    }
+  }
+  
+  if(mod = 'Magic resistance'){
+    if(n==1){
+      mod+= ' '+ (CPXC.d10()*5) + '%';
+    }
+    else {
+      mod+= ' '+ (50+CPXC.d10()*5) + '%';
+    }
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //main find function for SW monster DB

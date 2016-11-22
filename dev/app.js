@@ -1,6 +1,11 @@
 //Version 1.1
 //core object for Cosmic Power utilities
 const CPX = {
+  DW:{},
+  OSR:{},
+  SW:{},
+  FP : {},
+  hex:{},
   display:{},
   gen:{},
   user:{},

@@ -5,7 +5,6 @@
 
 //Fantasy plot Object
 //Contains basic data to be randomly selected
-CPX.FP = {};
 CPX.FP.factions=["Refugees", "Bandits", "Pirates", "Halfings", "Gnolls", "Goblins", "Lycantrophes", "Ogres", "Orcs", "Hobgoblins", "Trolls",  "Kobolds", "Lizardfolk", "Sahuagin", "Gargoyles", "Harpies", "Minotaurs", "Yeti", "Giant Insects", "Giant Spiders", "Giant Bugs", "Demi-humans", "Monstrous Humaniods", "Beasts", "Elves", "Dwarves", "Gnomes","Merfolk","Secret Brotherhood", "Assassins", "Monks",  "Dark Elves", "Deep Dwarves", "Ghouls", "Wights", "Wraiths", "Ghosts", "Vampires", "Aliens (Hive)", "Aliens (Conquerors)", "Aliens (Breeders)", "Aliens (Experimentors)", "Undead", "Constructs","Elementals", "Wizards", "Cultists", "Dragons", "Golems", "Liches", "Genies", "Outsiders (Positive)", "Outsiders (Negative)", "Outsiders (Neutral)", "Aliens (Alien)", "Foreigners", "Evil Empire", "Snake Men"];
 CPX.FP.threats=["Bandit", 'Monstrous Humanoid', "Demi-human", "Beast", "Alien Predator", "Intelligent Alien", "Dragon", "Elemental", "Outsider", "Undead", "Construct", "Wizard", "Vermin"];
 CPX.FP.villains=["Gang Lord","Murderer","Internal Faction","Cult Leader","Ruler of Lost Civilization","Wicked Foreigner","Thief","Assassin","Femme Fatale", "Law Official","Dictator","Foreign Allied Faction","Powerful Noble","Merchant","Crime Lord","Pirate","Anarchist", "Royal","Government Official","Mastermind","Nemesis",'Creature','Ruler','Former Ally','Monstrous Humanoid', 'Fanatic','Friend','Barbarian','Enemy','Shadowy Figure','Ally','Priest', 'Gang', 'Stranger', 'Nation','Mercenary', 'Criminals', 'Warrior','Watchmen', 'Spy', 'Military Veteran', 'Lunatic', 'Adventurer', 'Warlord', 'Recurring NPC', 'Champion','Construct', 'Undead', 'Giant','Invader', 'Demi-human','Immortal', 'Guild','Monster','Abberation','Outlaw','Traitor','Cult', "Wizard", "Supernatural Threat","Mad Alchemist", "Alien", 'Dragon', 'Magic User', 'Magical Beast', 'Artifact',  'Outsider', 'Sorcerer', 'Deity', 'Hazardous Environment', 'Time', 'War','Conspiracy', 'Puzzle'];
@@ -14,7 +13,6 @@ CPX.FP.hooks=["Solicitation","Dead Body","Disaster","Attack","Bizarre Occurrence
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Dungeon World data - spefically the data from the Fronts section
-CPX.DW = {};
 CPX.DW.DangerTypes=["Ambitious Organization","Planar Force","Arcane Enemy","Horde","Cursed Place"];
 CPX.DW.DangerList=[
   [["Misguided Good","To do what is 'right' no matter the cost"],["Thieves Guild","To take by subterfuge"],["Cult","To infest from within"],["Religious Organization","To establish and follow doctrine"],["Corrupt Government","To maintain the status quo"],["Cabal ","To absorb those in power, to grow"]],

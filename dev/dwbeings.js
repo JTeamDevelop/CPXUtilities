@@ -83,7 +83,6 @@ CPX.data.DWSPECIAL = {
   magic : ["divination","enchantment","evocation","illusion","necromancy","summoning"],
 }
 
-CPX.DW = {};
 CPX.DW.number = function (being,nid){
   if(typeof nid ==='undefined'){
     being.n = CPXC.weighted(["solitary", "group", "horde"],[4,5,3]); 

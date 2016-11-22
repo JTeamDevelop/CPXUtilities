@@ -15,7 +15,6 @@
 */
 
 //setup the NEDB to hold the monsters
-CPX.SW = {};
 CPX.SW.monsterdb  = new Nedb();
 CPX.SW.monsterdb.persistence.setAutocompactionInterval(120000);
 
