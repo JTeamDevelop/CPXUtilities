@@ -5,9 +5,9 @@
 
   <title>Cosmic Power Utilities</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="text/javascript" src="src/lib/jquery-1.11.3.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
-  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
+  <script type="text/javascript" src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
   <link rel="stylesheet" type="text/css" href="src/cpxu-1.1.min.css">
 
 </head>
@@ -90,8 +90,13 @@
             </p>
           </li>
           <li><strong>People/Creature Generator</strong>
-            <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
-            No statistics are provided, but most will have special ability "tags" to make them unique. 
+            <p>Randomly generate and create races based upon 
+            <a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
+            <em>Dungeon World</em></a> and OSR/
+            <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a> rules.  
+            This randomly generates Dungeon World "races" and creatures based on tables found in Perilous Wilds.  
+            It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste.  
             </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
@@ -112,6 +117,10 @@
           <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
             <em>Swords and Wizardry Complete Rule Book</em></a>, 
           by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
+            <em>Guardians</em></a>, 
+          by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
           </li>
           <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
             <em>d30 Sandbox Companion</em></a>, 
@@ -156,10 +165,17 @@
          Gygax and Dave Arneson.</p>
          <p>Swords & Wizardry Core Rules, Copyright 2008, Matthew J. Finch</p>
          <p>Swords & Wizardry Complete Rules, Copyright 2010, Matthew J. Finch</p>
+         <p>Monstrosities, Copyright 2012, Mythmere Games, published and distributed by Frog God Games.</p>
+         <p>Monster Compendium: 0e, Copyright 2008, Matthew J. Finch</p>
+         <p>Pathfinder RPG Bestiary, Copyright 2009, Paizo Publishing, LLC; Author: Jason Bulmahn, based on material by Jonathan Tweet, Monte Cook, and Skip Williams.</p>
+         <p>Tome of Horrors Complete, Copyright 2011, Necromancer Games, Inc., published and distributed by Frog God Games (Please see individual monster entries for complete and proper OGL referencing.)</p>
+         <p>Splinters of Faith, Copyright 2010, Author Gary Schotter & Jeff Harkness.</p>
+         <p>SW Monster Database, Copyright 2014, Author John Payne.</p>
       <p>Old-School Adventures™
          Accessory AX2: d30 Sandbox Companion,
          Copyright © 2013, Richard J. LeBlanc, Jr./
          New Big Dragon Games Unlimited</p>
+         <p>Guardians Core Rules, Copyright 2016, Night Owl Workshop, LLC.</p>
       <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
       <p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
       <p>High  Guard System Reference Document Copyright © 2008, Mongoose  Publishing.</p>
@@ -169,22 +185,20 @@
   </div>
 </body>
 
-  <script type="text/javascript" src="src/lib/vue.js"></script>
-  <script type="text/javascript" src="src/lib/localforage.min.js"></script>
-  <script type="text/javascript" src="src/lib/nedb.min.js"></script>
-  <script type="text/javascript" src="src/lib/jquery.noty.packaged.min.js"></script>
-  <script type="text/javascript" src="src/lib/chance.min.js"></script>
-  <script type="text/javascript" src="src/lib/createjs-2015.11.26.min.js"></script>
-  <script type="text/javascript" src="src/cpxu-1.1.min.js"></script>
-
+  <script type="text/javascript" src="lib/vue.js"></script>
+  <script type="text/javascript" src="lib/localforage.min.js"></script>
+  <script type="text/javascript" src="lib/nedb.min.js"></script>
+  <script type="text/javascript" src="lib/jquery.noty.packaged.min.js"></script>
+  <script type="text/javascript" src="lib/chance.min.js"></script>
+  <script type="text/javascript" src="lib/createjs-2015.11.26.min.js"></script>
+  <script type="text/javascript" src="src/cpxu-1.2.min.js"></script>
+  
   <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
   ga('create', 'UA-87794453-1', 'auto');
   ga('send', 'pageview');
   </script>
-
 </html>

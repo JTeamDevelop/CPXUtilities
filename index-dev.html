@@ -5,9 +5,9 @@
 
   <title>Cosmic Power Utilities</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="text/javascript" src="src/lib/jquery-1.11.3.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="src/lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
-  <script type="text/javascript" src="src/lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
+  <script type="text/javascript" src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
   <link rel="stylesheet" type="text/css" href="dev/slider.css">
   <link rel="stylesheet" type="text/css" href="dev/main.css">
 
@@ -21,6 +21,7 @@
     <h3 class="header center">Main Menu</h3>
     <div class="content">
       <button v-on:click="hexArea" type="button" class="btn btn-info btn-lg btn-block">HexMap Area Builder</button>
+      <button v-on:click="IncursionGen" type="button" class="btn btn-info btn-lg btn-block">Incursion Generator</button>
       <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generators</button>
       <button v-on:click="cityGen" type="button" class="btn btn-info btn-lg btn-block">City/Stronghold Generator</button>
       <button v-on:click="areaBuilder" type="button" class="btn btn-info btn-lg btn-block">Generic Area Builder</button>
@@ -97,7 +98,7 @@
             <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
             <em>Swords and Wizardry Complete Rule Book</em></a> rules.  
             This randomly generates Dungeon World "races" and creatures based on tables found in Perilous Wilds.  
-            It can also look up OSR monsters from Swords and Wizardry allowing you to modify them to your taste.  
+            It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste.  
             </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
@@ -118,6 +119,10 @@
           <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
             <em>Swords and Wizardry Complete Rule Book</em></a>, 
           by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
+            <em>Guardians</em></a>, 
+          by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
           </li>
           <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
             <em>d30 Sandbox Companion</em></a>, 
@@ -172,6 +177,7 @@
          Accessory AX2: d30 Sandbox Companion,
          Copyright © 2013, Richard J. LeBlanc, Jr./
          New Big Dragon Games Unlimited</p>
+         <p>Guardians Core Rules, Copyright 2016, Night Owl Workshop, LLC.</p>
       <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
       <p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
       <p>High  Guard System Reference Document Copyright © 2008, Mongoose  Publishing.</p>
@@ -181,27 +187,29 @@
   </div>
 </body>
 
-  <script type="text/javascript" src="src/lib/vue.js"></script>
-  <script type="text/javascript" src="src/lib/localforage.min.js"></script>
-  <script type="text/javascript" src="src/lib/nedb.min.js"></script>
-  <script type="text/javascript" src="src/lib/jquery.noty.packaged.min.js"></script>
-  <script type="text/javascript" src="src/lib/chance.min.js"></script>
-  <script type="text/javascript" src="src/lib/createjs-2015.11.26.min.js"></script>
+  <script type="text/javascript" src="lib/vue.js"></script>
+  <script type="text/javascript" src="lib/localforage.min.js"></script>
+  <script type="text/javascript" src="lib/nedb.min.js"></script>
+  <script type="text/javascript" src="lib/jquery.noty.packaged.min.js"></script>
+  <script type="text/javascript" src="lib/chance.min.js"></script>
+  <script type="text/javascript" src="lib/createjs-2015.11.26.min.js"></script>
   <script type="text/javascript" src="dev/app.js"></script>
+  <script type="text/javascript" src="dev/cpxdata.js"></script>
   <script type="text/javascript" src="dev/swmonsterdb.js"></script>
   <script type="text/javascript" src="dev/hex.js"></script>
   <script type="text/javascript" src="dev/hexdisplay.js"></script>
+  <script type="text/javascript" src="dev/mainmenu.js"></script>
+  <script type="text/javascript" src="dev/notify.js"></script>
+  <script type="text/javascript" src="dev/page.js"></script>
   <script type="text/javascript" src="dev/hexmap.js"></script>
   <script type="text/javascript" src="dev/hexmaparea.js"></script>
   <script type="text/javascript" src="dev/hexmapgen.js"></script>
   <script type="text/javascript" src="dev/encounters.js"></script>
   <script type="text/javascript" src="dev/trouble.js"></script>
   <script type="text/javascript" src="dev/starsystem.js"></script>
-  <script type="text/javascript" src="dev/mainmenu.js"></script>
-  <script type="text/javascript" src="dev/notify.js"></script>
-  <script type="text/javascript" src="dev/page.js"></script>
   <script type="text/javascript" src="dev/sandboxadvgen.js"></script>
   <script type="text/javascript" src="dev/fantasyplot.js"></script>
+  <script type="text/javascript" src="dev/incursion.js"></script>
   <script type="text/javascript" src="dev/areabuilder.js"></script>
   <script type="text/javascript" src="dev/fantasycity.js"></script>
   <script type="text/javascript" src="dev/dwsteading.js"></script>
@@ -213,15 +221,13 @@
   <script type="text/javascript" src="dev/swmonster.js"></script>
   <script type="text/javascript" src="dev/dwbeings.js"></script>
   <script type="text/javascript" src="dev/start.js"></script>
-
+  
   <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
   ga('create', 'UA-87794453-2', 'auto');
   ga('send', 'pageview');
   </script>
-
 </html>
