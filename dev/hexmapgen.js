@@ -1,3 +1,8 @@
+/* Version 1.1
+ Last chainge: update pop and ruin generation 
+ Use user input
+*/
+
 CPX.data.mapResources = ['Fertile Land', 'Lush Pasture','Good Fishing', 'Medicinal Plants', 'Good Hunting',
 'Old Industry', 'Good Mine', 'Rich Gathering', 'Good Timber', 'Magical Materials'];
 CPX.data.mapLairs = [
@@ -10,8 +15,10 @@ CPX.data.mapLairs = [
 CPX.hexMapGen = function (opts) {
   var map = CPX.rectHexArea(opts);
   map.class = ['hexMapGen'].concat(map.class);
-  //record density
-  map.density = opts.density
+  //record # of cities
+  map.ncity = opts.ncity;
+  //record # of ruins
+  map.nruin = opts.nruin;
   //gen terrain
   CPX.hexMapGen.terrain(map);
   //gen pop
@@ -96,62 +103,82 @@ CPX.hexMapGen.terrain = function(map){
 }
 //GVenerate the population
 CPX.hexMapGen.pop = function (map){
-  var CFP = CPX.CFP, dtxt = CFP.densities[map.density],
-  density = CFP[dtxt], pid=-1, c='', name='', size=0, n=0; 
+  var CFP = CPX.CFP, CA = CPX.cellArray(map), cid = '', size = 0, nc=map.ncity;
   
-  for(var x in map.cells){
-    //pop cance is 33%
-    if(map.RNG.bool({likelihood:33})){
-      //pick the pop id based upon the desnity of the map
-      pid = map.RNG.weighted(density.items,density.p);
-      //only if the id is greater tan 0, 0 is no pop
-      if (pid>8){
-        size = map.RNG.weighted([2,3,4,5],[3,6,2,1]);
-        if(['ruin','stronghold'].includes(CFP.habitation[pid])){
-          c = CFP.habitation[pid];
-          name = '';
-        }
-        else {
-          name = CFP.habitation[pid];
-          c='other';
-        }
-        map.cells[x].special.push({
-          name: name,
-          class:[c],
-          size: size
-        })
-      }
-      else if(pid>0){
-        //count locations bigger than thorp
-        if(pid>2){n++;}
-        //push a town of the size to the cell, size relative to index pid-1
-        map.cells[x].special.push({
-          class:['town'],
-          size: pid-1
-        })  
-      }
+  //for each ncity push the city to the map
+  for (var i=0; i<nc;i++){
+    //pick a cell
+    cid = map.RNG.pickone(CA);
+    //size is either small or large city
+    size = map.RNG.bool() ? 6 : 7;
+    //push the city to the cell
+    map.cells[cid].special.push({
+      class:['town'],
+      size: size
+    }) 
+  }
+  
+  //push the secondary towns (2-4 for each city)
+  //push the resources (1-3 for each city)
+  //push the lairs (1-3 for each city)
+  //always have one set of towns if ncity = 0 
+  var ns=-1;
+  nc++;
+  for (var i=0; i<nc; i++){
+    //2-4 for each city
+    ns = map.RNG.natural({min:2,max:4});
+    for(var j=0; j<ns;j++){
+      //pick a cell
+      cid = map.RNG.pickone(CA);
+      //size is 'hamlet','village','town, small', 'town, large'
+      size = map.RNG.natural({min:2,max:5});
+      //push the city to the cell
+      map.cells[cid].special.push({
+        class:['town'],
+        size: size
+      })   
+    }
+    //1-3 for each resource
+    ns = map.RNG.natural({min:1,max:3});
+    for(var j=0; j<ns;j++){
+      //pick a cell
+      cid = map.RNG.pickone(CA);
+      //size is relative random between 2-5 - like ruin
+      size = map.RNG.weighted([2,3,4,5],[3,6,2,1]);
+      //push the resource to the cell
+      map.cells[cid].special.push({
+        name: map.RNG.pickone(CPX.data.mapResources),
+        class:['resource'],
+        size: size
+      })   
+    }
+    //1-3 for each lair
+    ns = map.RNG.natural({min:1,max:3});
+    for(var j=0; j<ns;j++){
+      //pick a cell
+      cid = map.RNG.pickone(CA);
+      //size is relative random between 2-5 - like ruin
+      size = map.RNG.weighted([2,3,4,5],[3,6,2,1]);
+      //push the lair to the cell
+      map.cells[cid].special.push({
+        name: map.RNG.pickone(CPX.data.mapLairs),
+        class:['lair'],
+        size: size
+      })   
     }
   }
   
-  var id=-1, cr = CPX.cellArray(map), cl = CPX.cellArray(map), cid='';
-  for(var i=0;i<n;i++){
-    cid = map.RNG.pickone(cr);
-    id = map.RNG.pickone(CPX.data.mapResources);
-    map.cells[cid].special.unshift({
-      name: id,
-      class:['resource'],
-      type: CPX.data.mapResources.indexOf(id)
-    })
-    
-    cr.splice(cr.indexOf(cid),1);
-    cid = map.RNG.pickone(cl);
-    id = map.RNG.pickone(CPX.data.mapLairs);
+  //for each nruin push the ruin to the map
+  for (var i=0; i<map.nruin;i++){
+    //pick a cell
+    cid = map.RNG.pickone(CA);
+    //size of ruin 
+    size = map.RNG.weighted([2,3,4,5],[3,6,2,1]);
+    //push the ruin to the cell
     map.cells[cid].special.push({
-      name: id,
-      class:['lair'],
-      type: CPX.data.mapLairs.indexOf(id)
-    })
-    cl.splice(cl.indexOf(cid),1);
+      class:['ruin'],
+      size: size
+    }) 
   }
 
 }

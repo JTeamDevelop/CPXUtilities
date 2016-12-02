@@ -28,6 +28,14 @@ const RANKS = ['common','uncommon','rare','legendary','epic'];
 const DIERANKS = [['1d4'],['1d6'],['1d8'],['1d10'],['1d12'],
   ['1d6','1d8'],['1d8','1d8'],['1d8','1d10'],['1d10','1d10'],['1d6','1d8','1d8'],
   ['1d8','1d8','1d8'],['1d10','1d8','1d8'],['1d10','1d10','1d8'],['1d10','1d10','1d10']];
+const COLORS = {
+  red:{rgba:"rgba(255,0,0,1)", element:["stength","mighty","fire","sun","war","force","spirit"]},
+  orange:{rgba:"rgba(255,165,0,1)",element:["constitution","subtle","earth","healing","night","fertility","animal"]},
+  yellow:{rgba:"rgba(255,255,0,1)",element:["dexterity","quick","weather","lightning","time","travel","wealth"]},
+  green:{rgba:"rgba(0,128,0,1)",element:["intelligence","clever","air","knowledge","artifice","magic","winter"]},
+  blue:{rgba:"rgba(0,0,255,1)",element:["wisdom","wise","water","mind","righteousness","law","protection"]},
+  indigo:{rgba:"rgba(75,0,130,1)",element:["charisma","bold","charm","community","glory","luck","nobility"]}
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /**

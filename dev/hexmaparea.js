@@ -1,5 +1,5 @@
-/* Version 1.11
- Last chainge: fix bounds calculation to remove error
+/* Version 1.12
+ Last change: add ncity and nruin to generation
 */
 
 const HEXSITES = {
@@ -217,16 +217,19 @@ Vue.component('c-cha', {
         </span>\
       </div>\
       <div class="input-group strong" v-show="showlist.makegen">\
-        <span class="input-group-addon strong" >Pop Density</span>\
-        <select class="form-control" v-model="popdensity">\
-          <option v-for="d in desnities" v-bind:value="$index">{{d | capitalize}}</option>\
-        </select>\
-      </div>\
-      <div class="input-group strong" v-show="showlist.makegen">\
         <span class="input-group-addon strong">Width</span>\
         <input class="form-control center" type="number" v-model="width" min=10">\
         <span class="input-group-addon strong">Height</span>\
         <input class="form-control center" type="number" v-model="height" min=10">\
+      </div>\
+      <div class="input-group strong" v-show="showlist.makegen">\
+        <span class="input-group-addon strong" ># of Cities</span>\
+        <input class="form-control center" type="number" v-model="ncity" min=0">\
+        <span class="input-group-addon strong" ># of Ruins</span>\
+        <input class="form-control center" type="number" v-model="nruin" min=0">\
+      </div>\
+      <div class="center" v-show="showlist.makegen">\
+        <p>Plus 2-4 towns, 1-3 resources, and 1-3 lairs per city</p>\
       </div>\
       <div class="center" v-show="showlist.make">\
         <button v-on:click="make" type="button" class="btn btn-info strong">Generate Map</button>\
@@ -295,8 +298,8 @@ Vue.component('c-cha', {
       },
       type:'',
       front:'back',
-      desnities : CPX.CFP.densities,
-      popdensity : 0,
+      ncity : 0,
+      nruin : 0,
       terrains: TERRAINS,
       tcolor: terrainColors,
       palette: -1,
@@ -463,7 +466,8 @@ Vue.component('c-cha', {
         terrain: this.dataterrain,
         width:this.width,
         height:this.height,
-        density: this.popdensity
+        ncity: this.ncity,
+        nruin: this.nruin,
       });
       //reference
       this.map.VU = this;
