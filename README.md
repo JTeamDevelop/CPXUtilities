@@ -45,8 +45,13 @@ this page you will delete this data (so beware).
             </p>
           </li>
           <li><strong>People/Creature Generator</strong>
-            <p>This randomly generates "races" and creatures based on tables found in Perilous Wilds.  
-            No statistics are provided, but most will have special ability "tags" to make them unique. 
+            <p>Randomly generate and create races based upon 
+            <a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
+            <em>Dungeon World</em></a> and OSR/
+            <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a> rules.  
+            This randomly generates Dungeon World "races" and creatures based on tables found in Perilous Wilds.  
+            It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste. 
             </p>
           </li>
           <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
@@ -66,6 +71,10 @@ this page you will delete this data (so beware).
           <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
             <em>Swords and Wizardry Complete Rule Book</em></a>, 
           by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
+            <em>Guardians</em></a>, 
+          by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
           </li>
           <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
             <em>d30 Sandbox Companion</em></a>, 

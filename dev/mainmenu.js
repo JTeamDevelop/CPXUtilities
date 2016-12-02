@@ -54,6 +54,10 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-cha','');
     },
+    IncursionGen: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cpi','slim');
+    },
     cityGen: function(){
       this.show = false;
       CPX.vue.page.open('c-cfp','slim');

@@ -1,4 +1,6 @@
-//version 0.5
+/* Version 1.0
+ Added to main
+*/
 
 CPX.data.DWCREATURES = {
   beast : [["land","air","water"],[7,3,2]],
@@ -69,11 +71,7 @@ CPX.data.DWSPECIAL = {
     "amorphous",'cautious',"construct","devious","intelligent","magical","organized",
     "planar","stealthy","terrifying"
   ],
-  aspect : [
-    ["strength",'power'],["trickery","dexterity"],["time","constitution"],["knowledge","intelligence"],
-    ["nature","wisdom"],["culture","charisma"],["war","lies","discord"],["peace","truth","balance"],["hate","envy"],
-    ["love","admiration"],["element"]
-  ],
+  aspect : CPX.data.aspect.concat(["element"]),
   oddity : [
     ['weird color','weird smell','weird sound'],['geometric'],['web','network','system'],['crystalline','glass-like'],
     ['fungal'],['gaseous','smokey'],['mirage','illusion'],['volcanic','explosive'],['magnetic','repellant'],
@@ -472,6 +470,9 @@ CPX.DW.specialMod = function (being){
     if(el.includes('magic')){
       being.notes+='+1 spell move. ';
     }
+    if(el.includes('element')){
+      being.notes+='+1 elemental move. ';
+    }
   });
 }
 CPX.DW.special = function (type){
@@ -535,7 +536,7 @@ template: '\
     <div><strong>#: </strong>{{obj.n}}, <strong>Sz: </strong>{{obj.size}}, <span v-if="obj.special.length>0"><strong>Tags: </strong>\
       {{obj.special.join(`, `)}},</span> <strong>HP:</strong> {{obj.HP}}, <strong>Armor:</strong> {{obj.armor}}, \
       <strong>DMG:</strong> 1d{{obj.dmg.d}}<span v-if="obj.dmg.b>0">+{{obj.dmg.b}}</span>\
-      <span v-if="obj.dmg.p>0"> Piercing {{obj.dmg.p}}</span>\
+      <span v-if="obj.dmg.p>0"> Piercing {{obj.dmg.p}}</span> <strong>Rng: </strong>{{obj.range}}\
     </div>\
   </div>\
   '
@@ -545,24 +546,7 @@ Vue.component('c-pnc-DWB', {
   props: ['obj'],
   template: '\
   <div class="content-minor">\
-    <input class="form-control input-lg center" type="text" v-model="obj.name" placeholder="NAME">\
-    <textarea class="form-control" type="textarea" v-model="obj.notes" placeholder="ADD NOTES"></textarea>\
-    <div class="strong">Nature: {{obj.class.join(`, `)}}</div>\
-    <div class="content-minor">\
-      <div class="header strong center">Tags \
-        <button v-on:click="addtag" type="button" class="btn btn-xs">\
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>\
-        </button>\
-      </div>\
-      <div class="input-group" v-for="item in obj.special">\
-        <input class="form-control center" type="text" v-model="item">\
-        <span class="input-group-btn">\
-          <button v-on:click="remove($index)" type="button" class="btn">\
-            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
-          </button>\
-        </span>\
-      </div>\
-    </div>\
+    <c-pnc-generic v-bind:obj="obj" hname="Tags"></c-pnc-generic>\
     <div class="input-group">\
        <span class="input-group-addon strong"># Appearing</span>\
        <select v-model="obj.n" class="form-control">\

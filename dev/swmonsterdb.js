@@ -1,4 +1,4 @@
-/* Version 0.5
+/* Version 1
   Basic monster data from Swords and Wizardry
   
   OGL 15. COPYRIGHT NOTICE          
