@@ -430,6 +430,12 @@ CPX.data.element = [
   ['force','sorcery']
 ];
 CPX.data.magic = ["divination","enchantment","evocation",'abjuration','conjuration',"illusion","necromancy",'transmutation',"summoning"];
+CPX.data.traps = ["alarm",'ensnaring/paralyzing','pit','crushing','piercing/puncturing','chopping/slashing',
+'confusing (maze, etc.)','gas (poison, etc.)','element','ambush','magic']
+CPX.data.challenges = ['burglary', 'corruption', 'disorder', 'investigation', 'invention', 
+  'labor', 'performance', 'persuasion', 'puzzle'];
+CPX.data.rarity = ['common','uncommon','rare','legendary','epic'];
+
 CPX.data.GBWords = ['alacrity','artifice','beasts','bow','command','death','deception','earth','endurance',
 'fertility','fire','health','journeying','knowledge','luck','might','night','passion',
 'sea','sky','sorcery','sun','sword','time','wealth'];
@@ -511,4 +517,112 @@ CPX.gen.magic = function (n){
     schools.splice(schools.indexOf(R[i]),1);
   }
   return R;
+}
+CPX.gen.ally = function (RNG,CL) {
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  CL = typeof CL === "undefined" ? CL : 1;
+  //rank
+  var R = RNG.weighted([1,2,3,4,5],[1,0.3,0.075,0.02,0.005]),
+  rarity = CPX.data.rarity[R-1],
+  types = {
+    1:['hireling'],
+    2:['hireling','veteran'],
+    3:['hireling','veteran','elite'],
+    4:['veteran','elite'],
+    5:['cosmic','elite']
+  }
+  A = {class:['ally'],R:R,text:RNG.pickone(types[R])};
+  
+  if(A.text=='veteran'){}
+  else if(A.text=='elite'){}
+  
+  A.text+=' ('+rarity+')';
+  
+  return A;
+}
+CPX.gen.treasure = function (RNG) {
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  //rank
+  var R = RNG.weighted([1,2,3,4,5],[1,0.3,0.075,0.02,0.005]),
+  rarity = CPX.data.rarity[R-1],
+  types = {
+    1:['CPX','trinkets','tools','coins/gems/jewelry','supplies/trade goods'],
+    2:['magic item','poisons/potions','CPX','coins/gems/jewelry','supplies/trade goods','weapons/armor','scroll'],
+    3:['poisons/potions','CPX','coins/gems/jewelry','weapons/armor','scroll'],
+    4:['artifact','coins/gems/jewelry','weapons/armor','book/scroll'],
+    5:['artifact','coins/gems/jewelry','weapons/armor','book/scroll']
+  }
+  T = {class:['treasure'],R:R,text:RNG.pickone(types[R])};
+  
+  T.text+=' ('+rarity+')';
+  
+  return T;
+}
+CPX.gen.trap = function (RNG) {
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  //difficulty
+  var DC = RNG.weighted([1,2,3,4,5],[4,2,1,0.5,0.1]), DM=0,
+  T = {class:['trap'],D:0,dmg:4,text:RNG.pickone(DATA.traps)};
+  
+  if(DC == 1){ 
+    //if DC, increase difficulty by 0-2
+    DM = RNG.weighted([0,1],[1,1]);
+  }
+  else {
+    //if DC, increase difficulty randomly 
+    DM = RNG.natural({min:1,max:DC});
+  }
+  T.D+=DM*2; 
+  T.dmg+=(DC-DM)*2;
+  
+  if(objExists(CPX.gen[T.text])){
+    T.text = T.text+' ('+CPX.gen[T.text](1)[0]+')';
+  }
+  
+  if(T.text!='ambush'){
+    T.text += ' [-'+T.D+'/d'+T.dmg+']'  
+  }
+  
+  return T;
+}
+CPX.gen.challenge = function (RNG) {
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  //difficulty
+  var DC = RNG.weighted([1,2,3,4,5],[4,2,1,0.5,0.1]),
+  //type of challenge
+  type = RNG.pickone(CPX.data.challenges),
+  //object
+  C={class:['challenge',type],D:0,S:1},
+  DM=0;
+  
+  //if DC, increase difficulty by 2
+  if(DC == 2){ C.D+=2; }
+  else if(DC == 3){
+    //if DC, increase difficulty by 2 or 4
+    DM = RNG.weighted([1,2],[2,1]);
+    C.D+=2*DM;
+    //increase # of succeses
+    C.S+=2-DM;
+  }
+  else if(DC == 4){
+    //if DC, increase difficulty by 2-6
+    DM = RNG.weighted([1,2,3],[1,1,1]);
+    C.D+=2*DM;
+    //increase # of succeses
+    if(DM==1){C.S++;}
+  }
+  else if(DC == 5){
+    //if DC, increase difficulty by 2-8
+    DM = RNG.weighted([1,2,3,4],[1,1,1,1]);
+    C.D+=2*DM;
+    //increase # of succeses
+    C.S++;
+    //increase # of succeses more
+    if(DM<3){C.S++;}
+  }
+  
+  //set the text
+  C.text = '[-'+C.D+'/'+C.S+']';
+  
+  return C;
 }

@@ -23,8 +23,7 @@ var CPXC;
 DATA = CPX.data;
 //Base character list for UID determination
 const base62 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//Named rarity ranks
-const RANKS = ['common','uncommon','rare','legendary','epic'];
+//ranks
 const DIERANKS = [['1d4'],['1d6'],['1d8'],['1d10'],['1d12'],
   ['1d6','1d8'],['1d8','1d8'],['1d8','1d10'],['1d10','1d10'],['1d6','1d8','1d8'],
   ['1d8','1d8','1d8'],['1d10','1d8','1d8'],['1d10','1d10','1d8'],['1d10','1d10','1d10']];

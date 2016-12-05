@@ -17,18 +17,6 @@ CPX.PWD.discovery = {
   
 }
 
-TRAPTYPES = ["alarm",'ensnaring/paralyzing','pit','crushing','piercing/puncturing','chopping/slashing',
-            'confusing (maze, etc.)','gas (poison, etc.)','*element','ambush','*magic']
-
-CPX.PWD.trap = function (RNG) {
-  var T = {class:['trap'],text:RNG.pickone(TRAPTYPES)};
-  if(T.text[0] == '*'){
-    T.text = T.text.slice(1);
-    T.text = T.text+' ('+RNG.pickone(SPECIALNATURE[T.text])+')';
-  }
-  return T;
-}
-
 CPX.PWD.find = function (RNG) {
   var F = {class:['find'],text:''};
   var types = ['trinkets','tools','weapons/armor','supplies/trade goods','coins/gems/jewelry',
@@ -107,7 +95,7 @@ CPX.PWD.generate = function (seed) {
       }
       else if(el.ex[i]=="D") {
         type = D.RNG.weighted(CPX.PWD.dangers.core[0],CPX.PWD.dangers.core[1]);
-        if(type == 'trap') { special.push(CPX.PWD.trap(D.RNG)); } 
+        if(type == 'trap') { special.push(CPX.gen.trap(D.RNG)); } 
         else if(type == 'creature') { special.push(CPX.encounter(D.RNG)); } 
         else { special.push(CPX.PWD.entity(D.RNG)); }
       }

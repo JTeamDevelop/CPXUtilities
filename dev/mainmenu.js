@@ -54,6 +54,10 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-cha','');
     },
+    HeroEd: function(){
+      this.show = false;
+      CPX.vue.page.open('c-che','slim');
+    },
     IncursionGen: function(){
       this.show = false;
       CPX.vue.page.open('c-cpi','slim');
