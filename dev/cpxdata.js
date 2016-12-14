@@ -71,16 +71,20 @@ CPX.data.quickpowers = {
   MU : function (r,s) { return {id:'MU',rank:r,schools:s} },
   BW : function (r,e,a) { return {id:'ablast',rank:r,element:e,area:a} },
   undead : function () { return {id:'undead',rank:0} },
+  blast : function (r,e) { return {id:'blast',rank:r,element:e} },
+  aura : function (r,e) { return {id:'aura',rank:r,element:e} },
+  regen : function (r) { return {id:'regen',rank:r} },
+  immune : function (i) { return {id:'immune',rank:1,immunity:i} },
 };
 CPX.data.powertags = ['element','animal','bug','undead','ghost','dragon','fey',
   'earth','fire','air','water','sun','night','poison','disease','death','life',
   'armor','healing','mind','charm','luck','sneaky','magic','speed'];
 CPX.data.powers = [
-  {id:'blast',dmg:['2d6','4d6','6d6','8d6'],range:['near','near','far','sight'],
+  {id:'blast',dmg:['1d10','4d6','6d6','8d6'],range:['near','near','far','sight'],
     tags: ['element'],
     input:['rank','element'],
     replace: ['dmg','range','element'],
-    html: 'Blast (dmg) [rng,element]'
+    html: 'Blast (dmg) [range,element]'
   },
   {id:'ablast',dmg:['1d8','2d8','3d8','4d8'],
     tags: ['element','dragon'],
@@ -268,7 +272,7 @@ CPX.data.powers = [
   {id:'resist',save:[2,4],DRval:[4,8],
     tags: ['element','armor'],
     input:['rank','element'],
-    replace: ['save','DRval'],
+    replace: ['save','DRval','element'],
     html: 'Resist (element) +save DR[DRval]'
   },
   {id:'shapeshift',rank:1,
@@ -354,7 +358,7 @@ CPX.data.powers = [
     html: 'True Sight'
   },
   {id:'wallcrl',rank:1,
-    tags: ['bug'],
+    tags: [''],
     html: 'Wall Crawling'
   },
   {id:'weather',
@@ -435,11 +439,27 @@ CPX.data.traps = ["alarm",'ensnaring/paralyzing','pit','crushing','piercing/punc
 CPX.data.challenges = ['burglary', 'corruption', 'disorder', 'investigation', 'invention', 
   'labor', 'performance', 'persuasion', 'puzzle'];
 CPX.data.rarity = ['common','uncommon','rare','legendary','epic'];
+//the wealth of a...
+CPX.data.wealth = [
+  'middle class individual','wealthy professional','town','city','metropolis','state/provence','nation','large nation/multinational corp','national alliance','planet'
+]
 
 CPX.data.GBWords = ['alacrity','artifice','beasts','bow','command','death','deception','earth','endurance',
 'fertility','fire','health','journeying','knowledge','luck','might','night','passion',
 'sea','sky','sorcery','sun','sword','time','wealth'];
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.elementType = function (e){
+  if(["air",'sky','cloud','wind','storm'].includes(e)){return 'air';}
+  else if(["earth",'stone','mountain'].includes(e)){return 'earth';}
+  else if(["fire",'sun','desert','light'].includes(e)){return 'fire';}
+  else if(["water",'sea','storm'].includes(e)){return 'water';}
+  else if(['ice','winter'].includes(e)){return 'ice';}
+  else if(['lightning','storm','cloud'].includes(e)){return 'electricity';}
+  else if(['poison','disease'].includes(e)){return 'disease';}
+  else if(["life","death"].includes(e)){return e;}
+  else if(['force','sorcery'].includes(e)){return e;}
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.powerArray = function(tags){
   var PA=[];
   //if the tag is an array loop through each
@@ -459,6 +479,7 @@ CPX.powerArray = function(tags){
   }
   return PA;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.powerText = function(input){
   var P = CPX.data.powers.find(function(el){return el.id==input.id;}),
   txt = P.html;
@@ -486,6 +507,12 @@ CPX.powerText = function(input){
   });
   return txt;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.gen.actor = function (type){
+  return CPXC.pickone(CPX.data.actorCommon);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.aspect = function (n){
   var R = [], pick='';
   //until we get enough loop
@@ -497,6 +524,7 @@ CPX.gen.aspect = function (n){
   }
   return R;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.element = function (n){
   var R = [], pick='';
   //until we get enough loop
@@ -508,6 +536,7 @@ CPX.gen.element = function (n){
   }
   return R;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.magic = function (n){
   var schools = [].concat(CPX.data.magic), R=[];
   //loop through n
@@ -518,6 +547,7 @@ CPX.gen.magic = function (n){
   }
   return R;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.ally = function (RNG,CL) {
   RNG = typeof RNG === "undefined" ? CPXC : RNG;
   CL = typeof CL === "undefined" ? CL : 1;
@@ -540,6 +570,7 @@ CPX.gen.ally = function (RNG,CL) {
   
   return A;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.treasure = function (RNG) {
   RNG = typeof RNG === "undefined" ? CPXC : RNG;
   //rank
@@ -548,17 +579,26 @@ CPX.gen.treasure = function (RNG) {
   types = {
     1:['CPX','trinkets','tools','coins/gems/jewelry','supplies/trade goods'],
     2:['magic item','poisons/potions','CPX','coins/gems/jewelry','supplies/trade goods','weapons/armor','scroll'],
-    3:['poisons/potions','CPX','coins/gems/jewelry','weapons/armor','scroll'],
-    4:['artifact','coins/gems/jewelry','weapons/armor','book/scroll'],
-    5:['artifact','coins/gems/jewelry','weapons/armor','book/scroll']
+    3:['magic item','poisons/potions','CPX','coins/gems/jewelry','weapons/armor','scroll'],
+    4:['magic item','artifact','coins/gems/jewelry','weapons/armor','book/scroll'],
+    5:['magic item','artifact','coins/gems/jewelry','weapons/armor','book/scroll']
   }
   T = {class:['treasure'],R:R,text:RNG.pickone(types[R])};
   
-  T.text+=' ('+rarity+')';
+  if(['trinkets','coins/gems/jewelry','supplies/trade goods'].includes(T.text)){
+    var wealth = ' (the wealth of a ',
+    wi = CPXC.pickone([0,1]) + (R-1)*2;
+    wealth+=DATA.wealth[wi]+')';
+    T.text+=wealth;
+  }
+  else {
+    T.text+=' ('+rarity+')';  
+  }
   
   return T;
 }
-CPX.gen.trap = function (RNG) {
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.gen.trap = function (RNG,TL) {
   RNG = typeof RNG === "undefined" ? CPXC : RNG;
   //difficulty
   var DC = RNG.weighted([1,2,3,4,5],[4,2,1,0.5,0.1]), DM=0,
@@ -580,15 +620,19 @@ CPX.gen.trap = function (RNG) {
   }
   
   if(T.text!='ambush'){
-    T.text += ' [-'+T.D+'/d'+T.dmg+']'  
+    T.text += ' [-'+T.D+'/'+TL+'d'+T.dmg+']'  
   }
   
   return T;
 }
-CPX.gen.challenge = function (RNG) {
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.gen.challenge = function (RNG,CL) {
   RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  CL = typeof CL === "undefined" ? 1 : CL;
   //difficulty
-  var DC = RNG.weighted([1,2,3,4,5],[4,2,1,0.5,0.1]),
+  var DCbase = Math.floor(CL/4), 
+  DCr = [1,2,3,4,5].slice(DCbase), DCp = [4,2,1,0.5,0.1].slice(DCbase), 
+  DC = RNG.weighted(DCr,DCp),
   //type of challenge
   type = RNG.pickone(CPX.data.challenges),
   //object
@@ -625,4 +669,53 @@ CPX.gen.challenge = function (RNG) {
   C.text = '[-'+C.D+'/'+C.S+']';
   
   return C;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.gen.fight = function(I){
+  var r = CPXC.diceSum('3d6'), T=Number(I.T),
+    E={class:['encounter'],HD:{m:0,e:0},text:''}; 
+    
+  if(r<5){
+    E.HD.e = CPXC.diceSum('2d4')+T;
+    E.text = 'Special foe ['+E.HD.e+' HD]'
+  }
+  else if(r<9) { 
+    E.HD.m = CPXC.d4()+T; 
+    E.text = 'Minions ['+E.HD.m+' HD]'
+  }
+  else if(r<13) { 
+    E.HD.m = CPXC.diceSum('2d4')+T;
+    E.text = 'Minions ['+E.HD.m+' HD]'
+  }
+  else if(r<16) { 
+    E.HD.m = CPXC.diceSum('1d6')+T; 
+    E.text = 'Minions ['+E.HD.m+' HD]'
+    //guard beasts/allies
+    if(CPXC.bool()){ 
+      E.HD.m+= T; 
+      E.text+= 'Minions ['+E.HD.m+' HD] & Beasts/Allies'
+    }
+  }
+  else if(r<18) { 
+    //minions
+    E.HD.m = CPXC.diceSum('2d4'); 
+    //elites
+    E.HD.e = 2*T;
+    E.text = 'Elites ['+E.HD.e+' HD] & Minions ['+E.HD.m+' HD]'
+  }
+  // LT/boss
+  else {
+    //boss plus
+    E.HD.e = T+3;
+    E.text = 'Lieutenant ['+E.HD.e+' HD]';
+    //guard 
+    if(CPXC.bool()){ 
+      E.HD.m = CPXC.diceSum('3d6'); 
+      E.text+= ' & Minions ['+E.HD.m+' HD]';
+    }
+  }
+  
+  E.text = 'Fight: '+E.text+'.';
+  
+  return E;
 }

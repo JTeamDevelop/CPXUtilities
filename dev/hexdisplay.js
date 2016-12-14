@@ -89,3 +89,17 @@ CPX.display.centerAdjust = function (map) {
   });
   map.display.stage.update();
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.display.clearActive = function (map) {
+  if(objExists(map.display)){
+    //remove event listers to stop multi click
+    var containers = ['map','siteMarkers','tokens'];
+    containers.forEach(function(c) {
+      map.display[c].children.forEach(function(el) {
+        el.removeAllEventListeners();
+      });  
+    });
+    delete map.display;
+  }
+}
+

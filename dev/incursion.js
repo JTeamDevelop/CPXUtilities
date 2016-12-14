@@ -18,11 +18,14 @@ CPX.CPI.template = {
   challenge:'',
   Ttxt:'',
   sectors:[],
-  foes:[]
+  foes:[],
+  encountered:[],
 }
 CPX.CPI.addSector = function (I){
   //pull the temlpate
   var S = objCopy(CPX.CPI.SectorTemplate);
+  //create selectable list
+  CPX.CPI.foesSelectable(I);
   //add the explore array
   CPX.CPI.sectorExploreArray(S,I);
   //determine the closing challenge
@@ -31,135 +34,109 @@ CPX.CPI.addSector = function (I){
   S.challenge = CPXC.capitalize(CPXC.pickone(ct))+' '+C.text;
   //push to add
   I.sectors.push(S);
+  //do the elite shuffle
+  CPX.CPI.eliteShuffle(I);
+}
+CPX.CPI.eliteShuffle = function (I) {
+  var open = [], bi=-1; 
+  //if boss on the loose
+  if(!I.encountered.includes('boss')){
+    I.sectors.forEach(function(s,idx) {
+      //if not secured push to open
+      if(!s.secured){ open.push(idx); }
+    });
+    //select which one the boss will be in
+    bi = CPXC.pickone(open);
+  }
+  I.sectors.forEach(function(s,idx) {
+    //if not secured and there are encounters left
+    if(s.encounter>0 && !s.secured){
+      //push the boss
+      if(idx == bi) {
+        s.exarray.push(CPX.CPI.encounter(I,I.foesSelectable.boss));  
+      } 
+      //push the elite
+      else {
+        s.exarray.push(CPX.CPI.encounter(I,I.foesSelectable.elite));
+      }
+    }
+    //shuffle
+    s.exarray = CPXC.shuffle(s.exarray);
+  });
+}
+CPX.CPI.foesSelectable = function (I) {
+  I.foesSelectable={minion:[],elite:[],boss:[]};
+  //load the list of foes
+  I.foes.forEach(function(el) {
+    //push all minions
+    if(el.type=='minion'){ I.foesSelectable.minion.push(el.text); }
+    //push all elite
+    else if(el.type=='elite'){ I.foesSelectable.elite.push(el.text); }
+    else { 
+      //if not encountered
+      if(!I.encountered.includes(el.text)) {
+        //push the boss
+        if(el.type=='boss') { I.foesSelectable.boss.push(el.text); }
+        //lieutenant
+        else { I.foesSelectable.elite.push(el.text); }
+      }
+    }
+  });
+  
+  //if empty push generic
+  if(I.foesSelectable.minion.length==0){ I.foesSelectable.minion.push('Minion'); }
+  if(I.foesSelectable.elite.length==0){ I.foesSelectable.elite.push('Elite'); }
+  //no boss in encountered 
+  if(!I.encountered.includes('boss')){ 
+    if(I.foesSelectable.boss.length==0) { I.foesSelectable.boss.push('Boss'); }
+  }
 }
 CPX.CPI.sectorExploreArray = function (sector,I){
   var exbase = ['ally','treasure','encounter','trap'], elite=false;
   //empty the array
   sector.exarray = [];
-  
+
   var EF = {
     ally: function (){ return CPX.gen.ally(); },
     treasure: function (){ return CPX.gen.treasure(); },
-    encounter: function (){ return CPX.CPI.encounter(I,false);},
-    trap: function (){ return CPX.gen.trap(); }
+    encounter: function (){ return CPX.CPI.encounter(I,[]);},
+    trap: function (){ return CPX.gen.trap(CPXC,I.T); }
   }
-  
-  if(sector.encounter>0){
-    elite=true;
-    //push the elite
-    sector.exarray.push(CPX.CPI.encounter(I,true));
-    sector.encounter--;
-  }
+  //decrement to account for elite later - elite shuffle
+  if(sector.encounter>0){ elite=true; sector.encounter--; }
 
   //push the basic 
   exbase.forEach(function(el) {
-    //for each type push the required items
+    //for each type push the required # of items
     for(var i=0;i<sector[el];i++){
       sector.exarray.push(EF[el]())
     }
   });
-  
+  //add back for elite later - elite shuffle
   if(elite){sector.encounter++;}
-  
-  //shuffle
-  sector.exarray = CPXC.shuffle(sector.exarray);
 }
-
 CPX.CPI.encounter = function(I,elite){
-  var r = CPXC.d6(), n =0, T=Number(I.T),
-    E={class:['encounter'],text:''}, 
-    foes={}, list={minion:[],elite:[]};
-  
-  I.foes.forEach(function(el) {
-    var types = {
-      minion : ['vermin','rabble','soldier','thug','veteran'],
-      elite : ['controller','brute','tank','swarm','Lt.']  
-    }
-    
-    for(var x in types){
-      if(types[x].includes(el.type)) {
-        if(!list[x].includes(el.type)) { list[x].push(el.type); }
-      }
-    }
-    
-    if(objExists(foes[el.type])){
-      foes[el.type].push(el.text);
-    }
-    else {
-      foes[el.type] = [el.text];
-    }
-  });
-  
-  function foeSelect(type){
-    if(!objExists(foes[type])){  
-      if(elite){ 
-        if(list.elite.length==0) { return type; }
-        type = CPXC.pickone(list.elite); 
-      }
-      else{ 
-        if(list.minion.length==0) { return type; }
-        type = CPXC.pickone(list.minion); 
-      }
-    }
-    return CPXC.pickone(foes[type]);
+  var E={class:['encounter'],text:''};
+
+  function minions(){
+    var nm = CPXC.weighted(['1d4','1d6','2d4'],[1,2,3]);  
+    var t = CPXC.pickone(I.foesSelectable.minion);
+    return CPXC.diceSum(nm)+' '+t;
   }
   
-  //elite encounter
-  if(elite){
+  //if there is an elite array, make the encounter
+  if(elite.length>0) {
+    var name = CPXC.pickone(elite);
     E.class.push('elite');
-    //Controller
-    if(r==1){
-      n=CPXC.d6()+T;
-      E.text = foeSelect('controller')+', '+n+' '+foeSelect('vermin');
-    }
-    //Brute
-    else if(r==2){
-      n=CPXC.d4()+T;
-      E.text = foeSelect('brute')+', '+n+' '+foeSelect('thug');
-    }
-    //Tank
-    else if(r<5){
-      n=CPXC.d4();
-      E.text = foeSelect('tank')+', '+n+' '+foeSelect('thug');
-    }
-    //Swarm
-    else if(r==5){
-      E.text = foeSelect('swarm');
-    }
-    //Leader
-    else if(r==6){
-      n=CPXC.d4();
-      E.text = foeSelect('Lt.')+', '+n+' '+foeSelect('thug');
-    }
+    E.name = name;
+    E.text = name+'; ';
   }
-  //minion encounter
-  else {
-    //Vermin
-    if(r==1){
-      n=CPXC.d6();
-      E.text = n+' '+foeSelect('vermin');
-    }
-    //Rabble
-    else if(r==2){
-      n=CPXC.d4()+T;
-      E.text = n+' '+foeSelect('rabble');
-    }
-    //Rabble
-    else if(r<5){
-      n=CPXC.d4()+T;
-      E.text = n+' '+foeSelect('rabble')+', '+foeSelect('veteran');
-    }
-    //Soldiers
-    else if(r==5){
-      n=CPXC.d4()+T;
-      E.text = n+' '+foeSelect('soldier')
-    }
-    //Thugs
-    else if(r==6){
-      n=CPXC.d6()+T;
-      E.text = n+' '+foeSelect('thug')+', '+foeSelect('veteran');
-    }
-  }
+  //add a veteran 50/50
+  if(CPXC.bool()){ E.text+= 'Veteran; '}
+  //add minions
+  E.text += minions();
+  //50/50 of adding more minions
+  if(CPXC.bool()){ E.text+= '; '+minions();  }
   
   return E;
 }
@@ -180,9 +157,10 @@ Vue.component('c-cpi-sector', {
       <textarea class="form-control" type="textarea" v-model="S.notes" placeholder="INFO"></textarea>\
     </div>\
     <div class="input-group center">\
-      <span class="input-group-addon" id="pwd-addon-i">To Secure</span>\
+      <span class="input-group-addon" id="pwd-addon-i">Challenge</span>\
       <input class="form-control center" type="text" v-model="S.challenge">\
     </div>\
+    <div class="strong center bar-bottom">Events</div>\
     <div class="input-group center">\
       <span class="input-group-addon" id="pwd-addon-i">Ally</span>\
       <input class="form-control center" type="number" v-model="S.ally" @change="change">\
@@ -196,14 +174,17 @@ Vue.component('c-cpi-sector', {
       <input class="form-control center" type="number" v-model="S.encounter" @change="change">\
     </div>\
     <div class="center content-minor">\
-      <button v-on:click="explore" type="button" class="btn btn-info">Explore</button>\
-      Secured <input type="checkbox" v-model="S.secured" >\
-      <button v-on:click="reset" type="button" class="btn btn-info">Reset</button>\
-      <div class="input-group center" v-for="E in S.explored">\
-        <span class="input-group-addon" id="pwd-addon-i">{{E.class[0] | capitalize}}\
-          <span v-if="E.class.includes(`elite`)"> [Elite]</span>\
-        </span>\
-        <input class="form-control center" type="text" v-model="E.text">\
+      <div class="bar-bottom">\
+        <button v-on:click="explore" type="button" class="btn btn-info">Explore</button>\
+        Secured <input type="checkbox" v-model="S.secured" >\
+      </div>\
+      <div class="top-pad">\
+        <div class="input-group center" v-for="E in S.explored">\
+          <span class="input-group-addon" id="pwd-addon-i">{{E.class[0] | capitalize}}\
+            <span v-if="E.class.includes(`elite`)"> [Elite]</span>\
+          </span>\
+          <input class="form-control center" type="text" v-model="E.text">\
+        </div>\
       </div>\
     </div>\
   </div>\
@@ -215,13 +196,15 @@ Vue.component('c-cpi-sector', {
     remove: function(){
       HUB.$emit('CPI-remove',this.i)
     },
-    reset: function(){
-      this.S.explored =[];
-      this.S.secured = false;
-    },
     explore: function() {
       //pull the item from the explore array
       var ex = this.S.exarray.shift();
+      //push elite encounters
+      if(ex.class.includes('elite')){ 
+        this.I.encountered.push(ex.name); 
+        //look for boss
+        if(this.I.foesSelectable.boss.includes(ex.name)) { this.I.encountered.push('boss'); }
+      }
       //push it to explored
       this.S.explored.push(ex);
       //reduce the value accordingly
@@ -237,6 +220,7 @@ Vue.component('c-cpi', {
   <c-menubar id="CPI" v-bind:show="showmenu"></c-menubar>\
   <c-loadselect id="CPI" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
   <div class="content-minor center">\
+    <a role="button" class="btn btn-info center bottom-pad" href="cpxrpg.html">What are Incursions</a>\
     <input class="form-control input-lg center" type="text" v-model="content.name" placeholder="NAME">\
     <textarea class="form-control" type="textarea" v-model="content.notes" placeholder="ADD NOTES"></textarea>\
     <div class="input-group">\
@@ -251,10 +235,10 @@ Vue.component('c-cpi', {
       </span>\
     </div>\
     <p v-show="content.Ttxt.length>0">{{content.Ttxt}}</p>\
-    <h4 class="header center">Countdown: {{countdown}}</h4>\
   </div>\
   <div class="center">\
     <button v-on:click="add" type="button" class="btn btn-info">Add Sector Map</button>\
+    <button v-on:click="reset" type="button" class="btn btn-info">Reset All Sectors</button>\
   </div>\
   <h4 class="center bar-bottom">Foes \
     <button v-on:click="foe" type="button" class="btn btn-sm">\
@@ -296,7 +280,7 @@ Vue.component('c-cpi', {
       },
       showlist: {load:false},
       content: {},
-      foetypes:['vermin','rabble','soldier','thug','veteran','controller','brute','tank','swarm','Lt.','boss'],
+      foetypes:['minion','elite','lieutenant','boss'],
       allgens: {}
     }
   },
@@ -319,6 +303,26 @@ Vue.component('c-cpi', {
     }
   },
   methods: {
+    reset: function(){
+      var I=this.content;
+      //reset encountered
+      I.encountered = [];
+      //create selectable list
+      CPX.CPI.foesSelectable(I);
+      //run through the sectors
+      I.sectors.forEach(function(s) {
+        s.explored =[];
+        s.secured = false;
+        s.ally=1;
+        s.treasure=3;
+        s.encounter=4;
+        s.trap=2;  
+        //add the explore array
+        CPX.CPI.sectorExploreArray(s,I);
+      });
+      //do the elite shuffle
+      CPX.CPI.eliteShuffle(I);
+    },
     foe: function(){
       this.content.foes.push({type:'soldier',text:''});
     },
@@ -328,8 +332,11 @@ Vue.component('c-cpi', {
     change: function(){
       var I = this.content;
       I.sectors.forEach(function(el) {
+        //add the explore array
         CPX.CPI.sectorExploreArray(el,I);
       });
+      //do the elite shuffle
+      CPX.CPI.eliteShuffle(I);
     },
     trandom: function (){
       var r = CPXC.diceSum('2d6'), mod = 0, ACL = Number(this.content.ACL), T=0, OT=thus.content.T;

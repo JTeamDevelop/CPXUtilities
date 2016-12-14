@@ -103,8 +103,7 @@ CPX.vue.page = new Vue({
     close: function() {
       this.show = false;
       this.currentView = '';
-      this.genobject = {};
-      this.allgens = [];
+      this.allgens = {};
       vMainMenu.open();
     }
   }

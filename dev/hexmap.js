@@ -18,8 +18,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-V 1.2.1
+V 1.3.1
 Recalculate map bounds after doing mod update
+Change hexmap container to map
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,7 +407,7 @@ CPX.display.drawTokens = function (map) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.display.drawHex = function (map) {
   //display container ids
-  var dids = ['hexmap','siteMarkers'];
+  var dids = ['map','siteMarkers'];
   dids.forEach(function(el) {
     if(objExists(map.display[el])){
       //remove it and start fresh
@@ -435,7 +436,7 @@ CPX.display.drawHex = function (map) {
       CPX.display.makeGraphics({
         dtype: makeHex,
         onClick: CPX[map.class[0]].mapClick,
-        container: map.display.hexmap,
+        container: map.display.map,
         data: ddata 
       });
     }
@@ -463,19 +464,6 @@ CPX.display.drawHex = function (map) {
   CPX.display.drawTokens(map);
   //adjust everything
   CPX.display.centerAdjust(map);
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.display.clearActive = function (map) {
-  if(objExists(map.display)){
-    //remove event listers to stop multi click
-    var containers = ['hexmap','siteMarkers','tokens'];
-    containers.forEach(function(c) {
-      map.display[c].children.forEach(function(el) {
-        el.removeAllEventListeners();
-      });  
-    });
-    delete map.display;
-  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.display.hexMap = function (map) {

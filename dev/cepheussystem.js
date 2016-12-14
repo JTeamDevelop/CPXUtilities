@@ -1,3 +1,8 @@
+/*
+V1.1 
+Update how habzone is calculated
+*/
+
 var CHS = {};
 CHS.DATA = {
   //all in 100 km
@@ -78,7 +83,11 @@ CHS.DATA = {
   ]
 }
 CHS.system = function (seed){
-  var system = {seed:seed}, np=0, n=0;
+  var system = {
+    seed:seed,
+    planets : [],
+  };
+  
   system._id = seed.join('');
   system.RNG = new Chance(system._id);
   
@@ -86,61 +95,76 @@ CHS.system = function (seed){
   
   system.stars = [system.RNG.weighted(HABSTARS[0],HABSTARS[1])];
   //habitable zone
-  var habit = [STARS[system.stars[0]][0][1],STARS[system.stars[0]][0][2]];
+  var habit = [STARS[system.stars[0]][0][1],STARS[system.stars[0]][0][2]],
+  HZone = [], orbits = [];
+  //set the hzone for ref
+  system.HZone = {min:habit[0],max:habit[1]};
   
-  system.planets = [];
   //add gas giants
-  n=0;
+  var ng=0, nb=0, np=0;
   if(system.RNG.diceSum('2d6')>4){
-    n = system.RNG.d6()-2;
-    if(n<1) { n=1; }
-    for(var i=0;i<n;i++){
-      system.planets.push({class:['planet','gasgiant']});
-    }
+    ng = system.RNG.d6()-2;
+    if(ng<1) { ng=1; }
   }
   //number of planets based on giant presence
-  if(system.planets.length>0) { np = system.RNG.diceSum('2d6'); }
+  if(ng>0) { np = system.RNG.diceSum('2d6'); }
   else { np = system.RNG.diceSum('3d6'); }
   //add belts
-  n=0;
   if(system.RNG.diceSum('2d6')>3){
-    n = system.RNG.d6()-3;
-    if(n<1) { n=1; }
-    for(var i=0;i<n;i++){
-      system.planets.push({class:['belt']});
-    }
+    nb = system.RNG.d6()-3;
+    if(nb<1) { nb=1; }
+  }
+  
+  //do orbits
+  var tp = ng+nb+np, val =0;
+  //first orbit
+  orbits[0] = (system.RNG.d4()+1)/10;
+  //second orbit
+  orbits[1] = orbits[0]+0.3;
+  //Keppler function handles the rest of the orbits
+  for(var i=2;i<tp;i++){
+    val = Math.round10(orbits[0]+0.3*Math.pow(2,i-1),-1);
+    orbits[i] = val;
+    if(val>=habit[0] && val<=habit[1]){ HZone.push(val); }
+  }
+  //if no orbits in the hab zone
+  if(HZone.length==0){
+    //system.planets.push({class:['planet','terran']});
+    val = habit[0]+(habit[1]-habit[0])*system.RNG.d20()/20;
+    orbits.push(val);
+    //push to HZone 
+    HZone.push(val);
+    //sort orbits
+    orbits.sort(function(a, b){return a-b});
   }
 
-  //generate non-main planets
-  for(var i=system.planets.length;i<np;i++){
+  //gas giants
+  for(var i=0;i<ng;i++){
+    system.planets.push({class:['planet','gasgiant']});
+  } 
+  //belts 
+  for(var i=0;i<nb;i++){
+    system.planets.push({class:['belt']});
+  }
+  //planets
+  for(var i=0;i<np-1;i++){
     system.planets.push({class:['planet','terran']})
   }
   //randomize obits
   system.planets = system.RNG.shuffle(system.planets);
-  
-  system.HZone = [], val=0;
-  system.orbits = [(system.RNG.d4()+1)/10];
-  system.orbits[1] = system.orbits[0]+0.3;
-  for(var i=2;i<np;i++){
-    val = Math.round10(system.orbits[0]+0.3*Math.pow(2,i-1),-1);
-    system.orbits[i] = val;
-    if(val>=habit[0] && val<=habit[1]){ system.HZone.push(i); }
-  }
-  
-  if(system.HZone.length>0){
-    system.planets[system.RNG.pickone(system.HZone)] = {class:['planet','terran']};    
-  }
-  else {
-    system.planets.push({class:['planet','terran']});
-    val = habit[0]+(habit[1]-habit[0])*system.RNG.d20()/20;
-    system.orbits.push(val);
-    system.HZone.push(system.orbits.length-1);
-  }
+  //pick random hab for earthlike
+  var hi = orbits.indexOf(system.RNG.pickone(HZone));
+  //push the planet there to the end
+  system.planets.push(system.planets[hi]);
+  //push an earthlike instead
+  system.planets[hi] = {class:['planet','terran']};
   
   system.RNG = null;
   delete system.RNG;
   
   system.planets.forEach(function(el,idx) {
+    //set orbits
+    system.planets[idx].orbit = orbits[idx];
     CHS.planet(system,idx);
   });
   
@@ -150,11 +174,22 @@ CHS.planet = function (system,i) {
   var p =system.planets[i];
   p.RNG = new Chance(system._id+'-'+i);
   
+  function HZone(){
+    if(p.orbit>system.HZone.min && p.orbit<system.HZone.max){return true;}
+    return false;
+  }
+  
   if(p.class[1]=='terran'){
-    if(system.HZone.includes(i)) { CHS.main(p.RNG,p); }
+    if(HZone()) { CHS.main(p.RNG,p); }
     else { CHS.terran(p.RNG,p); }
   }
-  else if (p.class[1]=='gasgiant'){ CHS.gasGiant(p.RNG,p); }
+  else if (p.class[1]=='gasgiant'){ 
+    CHS.gasGiant(p.RNG,p);
+    if(HZone()) { 
+      p.moons=[{class:['planet','terran']}];
+      CHS.main(p.RNG,p.moons[0]); 
+    }
+  }
   
   p.RNG=null;
   delete p.RNG;
@@ -240,8 +275,8 @@ Vue.component('c-chs-star', {
 Vue.component('c-chs-planet', {
   props:['P','i',"O",'HZ'],
   template: '\
-  <div class="header strong">{{head | capitalize}} ({{O[i]}} AU) \
-  <div class="pull-right" v-if="HZ.includes(i)">[HabZone]</div></div>\
+  <div class="header strong">{{head | capitalize}} ({{P.orbit}} AU) \
+  <div class="pull-right" v-if="HZone">[HabZone]</div></div>\
   <div v-if="P.class.includes(`main`)" class="bottom-pad"><input class="form-control center" type="text" v-model="P.name" placeholder="NAME"></div>\
   <div v-if="P.class[1] == `terran`">\
   <div class="center"><strong>Diameter:</strong> {{D.size[P.size]*100}} km \
@@ -262,6 +297,10 @@ Vue.component('c-chs-planet', {
     }
   },
   computed: {
+    HZone: function(){
+      if(this.P.orbit>this.HZ.min && this.P.orbit<this.HZ.max){return true;}
+      return false;
+    },
     main: function(){
       if(this.P.class.includes('main')){return true;}
       return false;
@@ -274,66 +313,6 @@ Vue.component('c-chs-planet', {
         else{return this.P.class[1];}
       }
       return this.P.class[0];
-    }
-  }
-})
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-Vue.component('c-chs', { 
-  template: '<div>'+
-  '<h2 class="center">Traveller RPG System Generator</h2>'+
-  '<c-menubar id="CHS" v-bind:show="showmenu"></c-menubar>'+
-  '<c-loadselect id="CHS" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>'+
-  '<div class="content"><input class="form-control input-lg center" type="text" v-model="system.name" placeholder="NAME">'+
-  '<textarea class="form-control" type="textarea" v-model="system.notes" placeholder="ADD NOTES"></textarea></div>'+
-  '<h4 class="center bar-bottom">Stars</h4>'+
-  '<c-chs-star v-for="s in system.stars" v-bind:S="s" v-bind:i="$index"></c-chs-star>'+
-  '<h4 class="center bar-bottom">Planet</h4>'+
-  '<c-chs-planet v-for="p in system.planets" v-bind:HZ="system.HZone" v-bind:P="p" v-bind:i="$index" v-bind:O="system.orbits"></c-chs-planet>'+
-  '</div>',
-  data: function () {
-    return {
-      vid: 'CHS',
-      showmenu:{
-        new:true,
-        load:true,
-        save:true,
-        close:true
-      },
-      showlist: {load:false},
-      system: {},
-      loadgen: '',
-      allgens: {}
-    }
-  },
-  //called when created
-  created: function () {
-    CPX.vue.page.onCreated(this);
-  },
-  beforeDestroy: function () {
-    CPX.vue.page.onBeforeDestroy(this);
-  },
-  methods: {
-    save: function () {
-      CPXSAVE.setItem(this.system._id,this.system).then(function(){});
-      if(!objExists(this.allgens[this.system._id])){
-        Vue.set(this.allgens, this.system._id, this.system.name);
-      } 
-    },
-    load: function (S) {
-      this.system = S;
-    },
-    new : function () { 
-      this.system={};
-      this.generate();
-    },
-    generate: function () {
-      this.system = CHS.system(['CHS','-',CPXC.string({length: 27, pool: base62})]);
-    },
-    //close opens mainmenu
-    close: function() {
-      CPX.vue.page.close();
-      this.system = {};
-      this.allgens = [];
     }
   }
 })

@@ -101,7 +101,7 @@ CPX.SW.animalGen = function(opts){
   var SWM = CPX.data.SWMonsters, terrain='', R = [], air=false; 
   for(var i=0; i<n; i++){
     //bug
-    if(weight>0 && CPXC.bool({likeliehood:weight})){
+    if(weight==100 || weight>0 && CPXC.bool({likeliehood:weight})){
       terrain = CPXC.weighted(SWM.bug[0],SWM.bug[1]);  
       R.push(CPXC.pickone(SWM[terrain]));
     }
@@ -333,6 +333,36 @@ CPX.SW.elemental = function(CL){
       M.notes = form[0].join('-')+' like';
     }
   }
+  
+  //pick mods
+  var UP = CPX.powerArray(['combat']),
+  QP = CPX.data.quickpowers,
+  e = CPX.elementType(M.element[0]),
+  UP = UP.concat(CPX.powerArray(['e']));
+  //set the mods
+  CPX.SW.modCheck(M,[
+    {CL:0,modset:[QP.blast(0,M.element)]},
+    {CL:4,modset:[QP.blast(0,M.element),QP.immune(e)]},
+    {CL:7,modset:[QP.immune(e)],modpickn:1,modpick:[
+      QP.blast(0,M.element),
+      QP.aura(0,M.element),
+      QP.blast(1,M.element),
+      [QP.blast(0,M.element),QP.armor(1)],
+      QP.aura(1,M.element),
+    ]}
+  ]); 
+  
+  if(['air','electricity','fire'].includes(e)){
+    if(M.CL<=3){ M.mods.push(QP.fly(0)); }
+    else { M.mods.push(QP.fly(1)); }
+    
+    if(e=='air' && M.CL>6 && CPXC.bool()){ M.mods.push({id:'gasform',rank:1}); }
+  }
+  else if(e=='water'){
+    if(M.CL<7){ M.mods.push({id:'swim',rank:1}); }
+    else { M.mods.push({id:'swim',rank:2}); }
+    if(M.CL>6 && CPXC.bool()){ M.mods.push({id:'liquid',rank:1}); }
+  }
 
   //name
   M.name = M.element + ' elemental';
@@ -472,15 +502,34 @@ CPX.SW.animal = function(CL){
   return M;  
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.SW.bug = function(){
-  var SWM = CPX.data.SWMonsters;
-  var M = {
-    name : CPXC.pickone(SWM.bug),
-    class: ['animal'],
-    special:[],
-    notes:''
-  }
-  CPX.SW.basicMonster(M);
+CPX.SW.bug = function(CL){
+  //init with basic bug params
+  var M = CPX.SW.MInit({
+    CL : CL,
+    class : ['bug'],
+    HD: CL,
+  })
+  var form = CPX.SW.animalGen({weight:100});
+  M.name = form[0];
+
+  //pick mods
+  var UP = CPX.powerArray(['combat','bug']),
+  QP = CPX.data.quickpowers;
+  //set the mods
+  CPX.SW.modCheck(M,[
+    {CL:0,modpickn:1,modpick:[
+      {id:CPXC.pickone(UP),rank:0},
+      {id:CPXC.pickone(UP),rank:1}
+    ]},
+    {CL:5,modpickn:1,modpick:[
+      {id:CPXC.pickone(UP),rank:1},
+      {id:CPXC.pickone(UP),rank:2},
+    ]}
+  ]);
+  
+  //Run mods 
+  CPX.SW.modFinal(M);
+  
   return M;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -514,26 +563,19 @@ CPX.SW.beast = function (){
   return M;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.SW.chimerae = function (n){
+CPX.SW.chimerae = function (CL,n){
   n = typeof n === 'undefined' ? CPXC.natural({min:2,max:3}) : n;
+  //init with basic chimerae params
+  var M = CPX.SW.MInit({
+    CL : CL,
+    class : ['beast'],
+    HD: CL,
+    element : CPX.gen.element(1)
+  })
   //pick the number of beasts to mash together
-  var C=[], type='';
-  //make the mashup
-  for(var i=0;i<n;i++){
-    //select animals more than bugs
-    type = CPXC.weighted(['animal','bug'],[2,1]);
-    //push to array
-    C.push(CPX.SW[type]());
-  }
-  //the moster is based on the first
-  var M = C[0];
-  //develop the name as a mashup
-  if(C.length==2){
-    M.name += '-'+C[1].name;
-  }
-  else{
-    M.name += '-'+C[1].name+'-'+C[2].name;
-  }
+  //select animals more than bugs
+  var form = CPX.SW.animalGen({n:n,weight:35});  
+  M.name = form[0].join('-')+' chimerae';
   //give it a physical feature
   var feature =  CPXC.pickone(CPX.data.SWMonsters.physicalfeatures);
   feature = CPXC.pickone(feature);
@@ -542,8 +584,60 @@ CPX.SW.chimerae = function (n){
   }
   //put the feature in the notes
   M.notes = feature;
-  //basic monster info
-  CPX.SW.basicMonster(M);
+  //pick mods
+  var UP = CPX.powerArray(['combat','bug']),
+  QP = CPX.data.quickpowers;
+  e = CPX.elementType(M.element[0]);
+  
+  //set the mods
+  var modset0 = [], modset4 = [], modpick0 = [], 
+  modpick4=[
+    QP.blast(0,M.element),
+    QP.aura(0,M.element),
+    QP.BW(0,M.element,'cone'),
+    QP.immune(M.element),
+    {id:CPXC.pickone(UP),rank:1},
+    QP.blast(1,M.element),
+    [QP.blast(0,M.element),QP.armor(1)],
+    QP.aura(1,M.element),
+    [QP.BW(1,M.element,'cone'),QP.armor(0)],
+    QP.BW(2,M.element,'cone'),
+    QP.armor(2),
+    {id:CPXC.pickone(UP),rank:2}
+  ];
+  //50/50
+  if(CPXC.bool()){
+    modset0.push(CPXC.pickone([
+      QP.armor(0),
+      {id:'resist',rank:1,element:e},
+      {id:CPXC.pickone(UP),rank:0}
+    ]));
+  }
+  //flight
+  if(form[1]){ 
+    modset0.push(QP.fly(0)); 
+    if(CPXC.bool()){ modset4.push(QP.fly(0)); }
+    else { modset4.push(QP.fly(1)); }
+  }
+  
+  CPX.SW.modCheck(M,[
+    {CL:0,modset:modset0},
+    {CL:4,modset:modset4,modpickn:1,modpick:modpick4}
+  ]); 
+  
+  //attacks
+  var natk = CPXC.natural({min:2,max:3}),
+  atk = CPX.SW.attackGen(CL,natk);
+  if(natk==2){
+    M.attacks = '2 claws ('+atk[0]+')';  
+  }
+  else {
+    M.attacks = '2 claws ('+atk[0]+') & Bite ('+atk[1]+')';  
+  }
+  
+  //Run mods 
+  CPX.SW.modFinal(M);
+  
   return M;
 }
 CPX.SW.unnatural = function(){

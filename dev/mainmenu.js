@@ -54,6 +54,10 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-cha','');
     },
+    Sector: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cps','');
+    },
     HeroEd: function(){
       this.show = false;
       CPX.vue.page.open('c-che','slim');
@@ -61,6 +65,10 @@ var vMainMenu = new Vue({
     IncursionGen: function(){
       this.show = false;
       CPX.vue.page.open('c-cpi','slim');
+    },
+    InvestigationGen: function(){
+      this.show = false;
+      CPX.vue.page.open('c-cpv','slim');
     },
     cityGen: function(){
       this.show = false;
@@ -70,9 +78,9 @@ var vMainMenu = new Vue({
       this.show = false;
       CPX.vue.page.open('c-cab','slim');
     },
-    CephGen: function(event) {
+    SystemGen: function(event) {
       this.show = false;
-      CPX.vue.page.open('c-chs','slim');
+      CPX.vue.page.open('c-cpy','slim');
     },
     PWDGen: function(){
       this.show = false;

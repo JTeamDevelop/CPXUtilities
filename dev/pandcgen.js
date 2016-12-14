@@ -155,7 +155,7 @@ Vue.component('c-pnc', {
       setosrgen: false,
       osrbasic: ['animal','bug','beast','humanoid','giant-kin','plant','undead','fey','construct','fiend','elemental','dragon'],
       //osrgen: ['animal','bug','beast','chimerae','plant','human','humanoid','beastfolk','giant-kin','unnatural','undead','fey','construct','fiend','elemental','dragon'],
-      osrgen: ['undead','dragon'],
+      osrgen: ['dragon','elemental','undead','chimerae','bug'],
       typeselect :'',
       CL: {min:1,max:1},
       current: [],

@@ -90,6 +90,28 @@
   width:20px;
   height:20px;
 }
+.background-white {
+  background-color: white;
+}
+.height-limit-min {
+  max-height:400px;
+  overflow-y: auto;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
 /* ==========================================================================
 Maps
 ["water","swamp","desert","plain","forest","hill","mountain"];
