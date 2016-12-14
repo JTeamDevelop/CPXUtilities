@@ -78,8 +78,9 @@ this page you will delete this data (so beware).
             </p>
           </li>
         </ul>
-        <strong>This utility relies on data and rules from the following sources:</strong> 
-        <ul>
+        
+<strong>This utility relies on data and rules from the following sources:</strong> 
+<ul>
           <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
             <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
           licensed under a Creative Commons Attribution 3.0 Unported license.
