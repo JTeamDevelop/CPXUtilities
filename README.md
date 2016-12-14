@@ -13,9 +13,32 @@ this page you will delete this data (so beware).
 </p>
 <strong>Current Utilities:</strong>
 <ul>
-<li><strong>HexMap Editor</strong>
+          <li><strong>HexMap Editor</strong>
             <p>Either generate a random hex map or build your own.   
             Modify the terrain of individual hexes, and populate them with cities, ruins, lairs, and more.
+            </p>
+          </li>
+          <li><strong>Star Sector Generator</strong>
+            <p>Generates a random sector filled with star systems. Takes input on the number of systems. </p>
+          </li>
+          <li><strong>Star System Generator</strong>
+            <p>Generates a random star system. Uses either 
+            <a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            Traveller RPG</a> tables or 
+            <a href="http://www.drivethrurpg.com/product/94621/Stars-Without-Number-Core-Edition?affiliate_id=569798" class="strong">
+              <em>Stars Without Number</em></a>
+            tables.  
+            </p>
+          </li>
+          <li><strong>OSR Hero Editor</strong>
+            <p>Save and edit your heroes for quick reference. A generic OSR template is included along with 
+              templates for the following systems: 
+              <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+              <em>Swords and Wizardry</em></a>,
+              <a href="http://www.drivethrurpg.com/product/148169/White-Star-White-Box-Science-Fiction-Roleplaying-Swords--Wizardry?affiliate_id=569798" class="strong">
+              <em>White Star</em></a>, and 
+              <a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798" class="strong">
+              <em>Godbound</em></a>.
             </p>
           </li>
           <li><strong>Fantasy Plot Generators</strong>
@@ -51,14 +74,11 @@ this page you will delete this data (so beware).
             <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
             <em>Swords and Wizardry Complete Rule Book</em></a> rules.  
             This randomly generates Dungeon World "races" and creatures based on tables found in Perilous Wilds.  
-            It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste. 
+            It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste.  
             </p>
           </li>
-          <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
-            Traveller RPG</a> Star System Generator</strong>
-            <p>Generates a random star system based upon tables found in the SRD.</p>
-          </li></ul>
-<strong>This utility relies data and rules from the following sources:</strong> 
+        </ul>
+        <strong>This utility relies on data and rules from the following sources:</strong> 
         <ul>
           <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
             <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
@@ -72,6 +92,10 @@ this page you will delete this data (so beware).
             <em>Swords and Wizardry Complete Rule Book</em></a>, 
           by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
           </li>
+          <li><a href="http://www.drivethrurpg.com/product/148169/White-Star-White-Box-Science-Fiction-Roleplaying-Swords--Wizardry?affiliate_id=569798" class="strong">
+            <em>White Star: White Box Science Fiction Rolelpaying</em></a>, 
+          by James M. Spahn licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
           <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
             <em>Guardians</em></a>, 
           by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
@@ -83,6 +107,18 @@ this page you will delete this data (so beware).
           <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
             <em>Cepheus Engine System Reference Document</em></a>, 
           by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798" class="strong">
+            <em>Godbound</em></a>, 
+          by Kevin Crawford ©2016, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/94621/Stars-Without-Number-Core-Edition?affiliate_id=569798" class="strong">
+            <em>Stars Without Number</em></a>, 
+          by Kevin Crawford ©2010-2011, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/127180/Scarlet-Heroes?affiliate_id=569798" class="strong">
+            <em>Scarlet Heroes</em></a>, 
+          by Kevin Crawford ©2014, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
           </li>
           <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
             <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
