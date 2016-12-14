@@ -21,14 +21,16 @@
     <h3 class="header center">Main Menu</h3>
     <div class="content">
       <button v-on:click="hexArea" type="button" class="btn btn-info btn-lg btn-block">HexMap Area Builder</button>
+      <button v-on:click="Sector" type="button" class="btn btn-info btn-lg btn-block">Star Sector Generator</button>
+      <button v-on:click="SystemGen" type="button" class="btn btn-info btn-lg btn-block">Star System Generator</button>
       <button v-on:click="HeroEd" type="button" class="btn btn-info btn-lg btn-block">OSR Hero Editor</button>
-      <button v-on:click="IncursionGen" type="button" class="btn btn-info btn-lg btn-block">Incursion Generator</button>
       <button v-on:click="fpGen" type="button" class="btn btn-info btn-lg btn-block">Fantasy Plot Generators</button>
+      <button v-on:click="InvestigationGen" type="button" class="btn btn-info btn-lg btn-block">Investigation Generator</button>
+      <button v-on:click="IncursionGen" type="button" class="btn btn-info btn-lg btn-block">Incursion Generator</button>
       <button v-on:click="cityGen" type="button" class="btn btn-info btn-lg btn-block">City/Stronghold Generator</button>
       <button v-on:click="areaBuilder" type="button" class="btn btn-info btn-lg btn-block">Generic Area Builder</button>
       <button v-on:click="PWDGen" type="button" class="btn btn-info btn-lg btn-block">Perilous Wilds Dungeon Generator</button>
       <button v-on:click="PandCGen" type="button" class="btn btn-info btn-lg btn-block">People/Creature Generator</button>
-      <button v-on:click="CephGen" type="button" class="btn btn-info btn-lg btn-block">Traveller RPG System Generator</button>
       <button v-on:click="About" type="button" class="btn btn-info btn-lg btn-block">About the Program</button>
       <button v-on:click="clearAllData" type="button" class="btn btn-info btn-lg btn-block">Clear All Data</button>
       <a role="button" class="btn btn-info btn-lg btn-block" href="index-dev.html">Dev Page</a>
@@ -64,6 +66,29 @@
           <li><strong>HexMap Editor</strong>
             <p>Either generate a random hex map or build your own.   
             Modify the terrain of individual hexes, and populate them with cities, ruins, lairs, and more.
+            </p>
+          </li>
+          <li><strong>Star Sector Generator</strong>
+            <p>Generates a random sector filled with star systems. Takes input on the number of systems. </p>
+          </li>
+          <li><strong>Star System Generator</strong>
+            <p>Generates a random star system. Uses either 
+            <a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            Traveller RPG</a> tables or 
+            <a href="http://www.drivethrurpg.com/product/94621/Stars-Without-Number-Core-Edition?affiliate_id=569798" class="strong">
+              <em>Stars Without Number</em></a>
+            tables.  
+            </p>
+          </li>
+          <li><strong>OSR Hero Editor</strong>
+            <p>Save and edit your heroes for quick reference. A generic OSR template is included along with 
+              templates for the following systems: 
+              <a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+              <em>Swords and Wizardry</em></a>,
+              <a href="http://www.drivethrurpg.com/product/148169/White-Star-White-Box-Science-Fiction-Roleplaying-Swords--Wizardry?affiliate_id=569798" class="strong">
+              <em>White Star</em></a>, and 
+              <a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798" class="strong">
+              <em>Godbound</em></a>.
             </p>
           </li>
           <li><strong>Fantasy Plot Generators</strong>
@@ -102,12 +127,8 @@
             It can also look up or randomly generate OSR monsters (Swords and Wizardry based) allowing you to modify them to your taste.  
             </p>
           </li>
-          <li><strong><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
-            Traveller RPG</a> Star System Generator</strong>
-            <p>Generates a random star system based upon tables found in the SRD.</p>
-          </li>
         </ul>
-        <strong>This utility relies data and rules from the following sources:</strong> 
+        <strong>This utility relies on data and rules from the following sources:</strong> 
         <ul>
           <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
             <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
@@ -121,6 +142,10 @@
             <em>Swords and Wizardry Complete Rule Book</em></a>, 
           by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
           </li>
+          <li><a href="http://www.drivethrurpg.com/product/148169/White-Star-White-Box-Science-Fiction-Roleplaying-Swords--Wizardry?affiliate_id=569798" class="strong">
+            <em>White Star: White Box Science Fiction Rolelpaying</em></a>, 
+          by James M. Spahn licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
           <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
             <em>Guardians</em></a>, 
           by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
@@ -132,6 +157,18 @@
           <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
             <em>Cepheus Engine System Reference Document</em></a>, 
           by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798" class="strong">
+            <em>Godbound</em></a>, 
+          by Kevin Crawford ©2016, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/94621/Stars-Without-Number-Core-Edition?affiliate_id=569798" class="strong">
+            <em>Stars Without Number</em></a>, 
+          by Kevin Crawford ©2010-2011, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/127180/Scarlet-Heroes?affiliate_id=569798" class="strong">
+            <em>Scarlet Heroes</em></a>, 
+          by Kevin Crawford ©2014, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
           </li>
           <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
             <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
@@ -168,6 +205,8 @@
          Gygax and Dave Arneson.</p>
          <p>Swords & Wizardry Core Rules, Copyright 2008, Matthew J. Finch</p>
          <p>Swords & Wizardry Complete Rules, Copyright 2010, Matthew J. Finch</p>
+         <p>White Star: White Box Science Fiction Rolelpaying, Copyright 2015
+         Barrel Rider Games; Author James M. Spahn.</p>
          <p>Monstrosities, Copyright 2012, Mythmere Games, published and distributed by Frog God Games.</p>
          <p>Monster Compendium: 0e, Copyright 2008, Matthew J. Finch</p>
          <p>Pathfinder RPG Bestiary, Copyright 2009, Paizo Publishing, LLC; Author: Jason Bulmahn, based on material by Jonathan Tweet, Monte Cook, and Skip Williams.</p>
@@ -206,17 +245,20 @@
   <script type="text/javascript" src="dev/hexmap.js"></script>
   <script type="text/javascript" src="dev/hexmaparea.js"></script>
   <script type="text/javascript" src="dev/hexmapgen.js"></script>
+  <script type="text/javascript" src="dev/sector.js"></script>
   <script type="text/javascript" src="dev/encounters.js"></script>
   <script type="text/javascript" src="dev/trouble.js"></script>
   <script type="text/javascript" src="dev/starsystem.js"></script>
   <script type="text/javascript" src="dev/sandboxadvgen.js"></script>
   <script type="text/javascript" src="dev/fantasyplot.js"></script>
   <script type="text/javascript" src="dev/incursion.js"></script>
+  <script type="text/javascript" src="dev/investigation.js"></script>
   <script type="text/javascript" src="dev/areabuilder.js"></script>
   <script type="text/javascript" src="dev/fantasycity.js"></script>
   <script type="text/javascript" src="dev/dwsteading.js"></script>
   <script type="text/javascript" src="dev/cpxcity.js"></script>
   <script type="text/javascript" src="dev/cepheussystem.js"></script>
+  <script type="text/javascript" src="dev/swnplanet.js"></script>
   <script type="text/javascript" src="dev/pwdungeon.js"></script>
   <script type="text/javascript" src="dev/swencounters.js"></script>
   <script type="text/javascript" src="dev/pandcgen.js"></script>

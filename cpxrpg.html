@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <title>Cosmic Power RPG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.7-dist/css/bootstrap.min.css"></script>
+  <script type="text/javascript" src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="dev/slider.css">
+  <link rel="stylesheet" type="text/css" href="dev/main.css">
+
+</head>
+
+<body>
+  <div class="window" v-bind:class="width" id="cpxpage" v-show="show" v-cloak>
+    <component v-bind:is="currentView"></component>
+  </div>
+  <div class="notify" id="mainNotify" v-show="show" v-cloak>
+    <h3 class="header center">{{header}}</h3>
+    <div class="content">{{{content}}}</div>
+    <component v-bind:is="currentView"></component>
+    <div v-show="showclose" class="center">
+      <button v-on:click="close" type="button" class="btn btn-info">Close</button>
+    </div>
+  </div>
+  <div id="logo" ></div>
+  <div class="hidden">
+    <template id="cpxrpg">
+      <h2 class="center header">Cosmic Power RPG</h2>
+      <div class="content">
+        <p>
+          Cosmic Power is about not just saving the world, but saving multiple worlds.  
+          It is about galactic scale superheroes.  The rules utilize Sine Nomine Publishing’s 
+          Godbound ruleset for playing demigods, and makes some tweaks to adapt it to the cosmic superhero genre.  
+          Godbound is an excellently written book by Mr. Kevin Crawford and it is available in a 
+          <a href="http://www.drivethrurpg.com/product/185959/Godbound-A-Game-of-Divine-Heroes-Free-Edition?affiliate_id=569798">
+          <em>free version</em></a> (all the basic rules for play) as well as a 
+          <a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798">
+          <em>deluxe edition</em></a> that has art and some extra content.     
+        </p>
+        <p>
+          Cosmic Power also adds some tools for play without a GM - or at least make a GM’s life easier.  
+          Sometimes there just isn’t someone to come up with the story for the evening, 
+          but you can still play a game with your friends.
+        </p>
+        <button v-on:click="incursion" type="button" class="btn btn-info btn-lg btn-block">Incursion Rules</button>
+        <button v-on:click="challenge" type="button" class="btn btn-info btn-lg btn-block">Challenge Rules</button>
+        <a role="button" class="btn btn-info btn-lg btn-block" href="index.html">Return to the Generator</a>
+      </div>
+    </template>
+    <template id="incursion">
+      <h3 class="center header">Incursions</h3>
+      <div class="content">
+        <p>
+          When an Outsider launches a blatant assault on a city of a civilized world 
+          it is called an Incursion.  The section that follows details the steps to run 
+          an Incursion for a quick evening of play with minimal setup.  An Incursion 
+          generator is included with CPX Utilities.  
+        </p>
+        <p>
+          Incursion take place across a number of Sectors (5 is a good round number).  
+          The size of Sectors are nebulous, as is their layout.  Using the generator 
+          you can generate a random Hex Map layout for your Incursion.  To quickly represent 
+          this on a table you can use an equal number of sticky notes. 
+        </p>
+        <p>
+          Every player should select a marker to represent their character and place it in a Sector.  
+          The goal is to find and defeat the Leader of the Incursion OR Secure all the Sectors through Exploration. 
+        </p>
+        <p>
+          The rest of the text assumes that every character Explores their own Sector, 
+          but that does not have to be the case.  It is a tactical decision whether 
+          to split up or not, and less combat capable heroes may wish to explore with an ally.
+        </p>
+        <h4 class="center bar-bottom">Threat Level</h4>
+        <p>
+          Every Incursion has a Threat level (T). The minimum Threat level is always 1.  
+          The Threat level is usually the average Character Level of all of the characters.  
+          Either write the number down or set a d20 on the table as a reminder of the Threat level.  
+          It will be referenced throughout the Incursion.   
+        </p>
+        <h4 class="center bar-bottom">Foes</h4>
+        <p>
+          By adding Foes to the Incursion, you add to a pool that will be randomly 
+          picked from when a Character has an Encounter.  There are four types of Foes: 
+          minions, elites, lieutenants and boss.  Input the name of the Foe and its 
+          type for the Generator to use it.  The Generator treats minions and elites 
+          as if there are an unlimited number, but each lieutenant and boss is unique.    
+        </p>
+        <h4 class="center bar-bottom">Sectors</h4>
+        <p>
+          Sectors all have a standard format that begins with the Sector’s Name and Notes.  
+          This is followed by the Challenge that will be required to Secure them.  
+          A character can only perform this Challenge after they have fully Explored 
+          the Sector or defeated an Elite Encounter.     
+        </p>
+        <p>
+          After the Challenge there are four inputs: Ally, Treasure, Trap, and Encounter.  
+          Think of each Sector like a deck of cards.  Every time it is Explored, 
+          you pick a card and an event occurs.  These four inputs determine the number 
+          and type of events in the deck.  The total number does not have to equal 10 - 
+          it can be any number you like and it can be changed during play.      
+        </p>
+        <p>
+          This section is followed by the Explore button, Secured checkbox and the 
+          Reset button.  Every time the Explore button is pressed a random “card” 
+          will be pulled and the event numbers will be decreased.  Checking the Secured 
+          checkbox signals the Sector has been Secured.       
+        </p>
+        <h4 class="center bar-bottom">Actions</h4>
+        <p>
+          Every round the heroes can perform one of the following actions: Move, 
+          Explore, Fight, or Support.  If they choose to Move they can move to an 
+          adjacent Sector.  If the hero encountered foes due to Exploring a Sector 
+          they must Fight every round until the foes are defeated or the foes flee.  
+          A character with the right abilities may Support another hero, as long as they 
+          are within range of their abilities.    
+        </p>
+        <h4 class="center bar-bottom">Exploring the Sectors</h4>
+        <p>
+          Every round that a player isn’t facing foes, a hero may explore the 
+          sector it is in order to clear and secure them.  A sector must be explored 
+          until an Elite foe is encountered and defeated.  After that any hero may 
+          attempt to secure the Sector by performing a Challenge.     
+        </p>
+        <p>
+          To Explore - press the “Explore” button of the Sector that the character is in.  
+          The Generator will randomly select an Event.  The result of the exploration will 
+          appear at the bottom of the Sector box (below the buttons or the last exploration result).  
+          The Events correspond to the Event inputs above: an Ally, Treasure, Trap or Encounter.  
+          An Encounter will tell you if it is an Elite foe.
+        </p>
+        <h4 class="center bar-bottom">Ally</h4>
+        <p>
+          When an Ally appears it signifies a friendly non-player character has been encountered.  
+          Allies will (generally) aid your cause.  The exact nature of the ally is up to you, but their type is provided. 
+        </p>
+        <h4 class="center bar-bottom">Treasure</h4>
+        <p>
+          Treasure either represents treasure found, or something taken from fallen foes.  
+          The exact nature is up to you, but its type and rarity is provided.
+        </p>
+        <h4 class="center bar-bottom">Trap</h4>
+        <p>
+          Traps are set up by the Foes and their sole purpose is to harm and debilitate 
+          the characters.  When the result of an exploration is a Trap, they must be 
+          spotted and then successfully disarmed (or alternatively navigated around).  
+          This is modeled by performing an Intelligence Check. Each Trap description 
+          will include its effect type: ensnaring, pit, piercing, poison, element, etc. 
+          and numbers in brackets: [-X/Y] (ex: piercing/puncturing [-4/1d4]).  
+          -X represents the Check penalty, while the Y represents the Damage dice rolled on 
+          a failure (a Saving Throw is allowed for half damage). 
+        </p>
+        <h4 class="center bar-bottom">Encounter</h4>
+        <p>
+          Encounters are the heart of an Incursion - after all the point is to free 
+          the Sectors from the threat of the Foes.  Each Encounter will usually 
+          feature a handful (and up to a dozen) foes.  This will generally be minions, 
+          but during an Elite Encounter they will be lead by either an elite, lieutenant or the boss.
+        </p>
+        <p>
+          Elite Encounters signify the major resistance of the Sector, and once defeated 
+          it is assumed the remainder of the minions move to other Sectors to regroup.  
+          Once the Elite Foe is vanquished the characters can then try to Secure the Sector by completing the Challenge.  
+        </p>
+        <h4 class="center bar-bottom">Securing a Sector</h4>
+        <p>
+          To Secure a Sector a Character must successfully complete the listed Challenge.  
+          The Challenge represents either an obstacle created by the Foes or results 
+          from collateral damage cause by the Incursion.
+        </p>
+        <p>
+          Consult the section on Challenges for more information on how they are overcome.  
+          All the Challenges are considered Relaxed - any number of failures is acceptable, 
+          but it is a setback due to time.  Once this Challenge has been defeated the Sector 
+          is secure and the players can focus on the other Sectors.  Check the Secured checkbox 
+          to signify the Sector is Secured.  
+        </p>
+        <button v-on:click="close" type="button" class="btn btn-info btn-block">Home</button>
+      </div>
+    </template>
+    <template id="challenge">
+      <h3 class="center header">Challenges</h3>
+      <div class="content">
+        <p>
+          Challenges are thematic extended Attribute checks - the skill based equivalent to Fights.  
+          There are eight types of Challenges: Burglary, Corruption, Disorder, Investigation, 
+          Invention, Labor, Persuasion, and Puzzle.  Each Challenge has its own difficulty 
+          and a specific number of Attribute Checks required to Overcome it.  
+        </p>
+        <p>
+          When reading a Challenge they will always be written as Type [-X/Y].  
+          Type is one of the 8 types of Challenges, X is the Attribute Check penalty, 
+          and Y is the required number of Successes to Overcome it.
+        </p>
+        <h4 class="center bar-bottom">Challenge Types</h4>
+        <p>
+          <strong>Burglary:</strong> This challenge involves the theft of some item (small or large), 
+          stealthy action, or other roguish business.  Such challenges rely on the arts 
+          of breaking and entering and stealth.  Failures often results in fights 
+          and being unable to obtain the goal.  
+          </br><strong>Corruption:</strong>  Corruption is rampant and either no-one is aware, or no one 
+          can stand up to it.  This challenge involves revealing and rooting it out.  
+          The corruption could take the form of mob influence, a slumbering evil, 
+          the presence of a sinister cult, or simply an official’s corrupt practice.  
+          Failures may result in fights or simply a thorough beating.  
+          </br><strong>Disorder:</strong>  The characters must re-establish the rule of law.  Chaos and 
+          uncertainty rule, and men and women with cool heads who can plan and take 
+          decisive action are necessary.  Even though there is disorder, fighting is 
+          almost never the answer.  Failure usually results in the spread of more disorder.    
+          </br><strong>Investigation:</strong>  Something has been lost, someone has been kidnapped, or a 
+          more devious crime has been committed.  Sharp eyes, and quick wits are 
+          required to track down clues and connect the threads to crack the case.  
+          Failure usually results in trouble and a bad reputation for the investigator.  
+          </br><strong>Invention:</strong>  Intelligence and ingenuity are required.  Something highly 
+          technical and beyond the capability of most must be designed and built in 
+          short order.  It may be a theory, invention, or medical breakthrough.  
+          It doesn’t have to look good, but it had better work.  
+          Alternately, the challenge may be to take apart something very dangerous 
+          and highly technical.  Failure means others suffer.    
+          </br><strong>Labor:</strong>  This challenge calls for strong backs, stamina, and the will to work.  
+          A structure must be built, fields must re-planted, a road must be cut, the 
+          river diverted, or the people must be fitted for war.  Failure means the 
+          job goes undone and people are disheartened.     
+          </br><strong>Persuasion:</strong>  The characters must sway someone’s will.  They will have to 
+          rely on silver tongues, charisma, and rapport with the people.  They may 
+          have to convince officials, settle a mob, or bring enemies to the table to 
+          negotiate.  Failure usually results in increased hostility. 
+          </br><strong>Puzzle:</strong>  It may be an actual physical puzzle, a riddle, or a game of skill 
+          and wits. There is something esoteric that requires a calculating mind and 
+          sharp wits to unravel.  Failure usually results in the loss of time or lost opportunity.  
+        </p>
+        <h4 class="center bar-bottom">Performing Tests</h4>
+        <p>
+          All Challenges have a primary and a secondary Attribute that rely on.  
+          Prior to performing a Challenge roll a 1d10 and consult the Challenge 
+          Attribute Check table based upon the Type of Challenge that the character 
+          is facing.  This determines the Attribute Check that is required for 
+          that roll.  If a 10 is rolled - wildcard - pick an Attribute at random 
+          to perform the Check.
+        </p>
+        <div class="center strong">Challenge Attribute Check Table</div>
+        <table>
+          <tr>
+            <th>Challenge Type</th>
+            <th>Primary Attribute (1-6)</th> 
+            <th>Secondary Attribute (7-9)</th>
+          </tr>
+          <tr>
+            <td>Burglary</td>
+            <td>Dexterity</td> 
+            <td>Intelligence</td>
+          </tr>
+          <tr>
+            <td>Corruption</td>
+            <td>Wisdom</td> 
+            <td>Charisma</td>
+          </tr>
+          <tr>
+            <td>Disorder</td>
+            <td>Charisma</td> 
+            <td>Wisdom</td>
+          </tr>
+          <tr>
+            <td>Investigation</td>
+            <td>Intelligence</td> 
+            <td>Charisma</td>
+          </tr>
+          <tr>
+            <td>Invention</td>
+            <td>Intelligence</td> 
+            <td>Dexterity</td>
+          </tr>
+          <tr>
+            <td>Labor</td>
+            <td>Strength</td> 
+            <td>Constitution</td>
+          </tr>
+          <tr>
+            <td>Persuasion</td>
+            <td>Charisma</td> 
+            <td>Wisdom</td>
+          </tr>
+          <tr>
+            <td>Puzzle</td>
+            <td>Wisdom</td> 
+            <td>Intelligence</td>
+          </tr>
+        </table>
+        <h4 class="center bar-bottom">Outcome</h4>
+        <p>
+          The outcome is dependent upon how strict the Challenge is.  A Challenge 
+          can either be Relaxed, Lenient, or Strict.  In a Relaxed Challenge any 
+          number of failures are allowed and as long a the character eventually 
+          completes the required number of Attribute Checks succeed.  In a Lenient 
+          Challenge, the number of Successes and the number of Failures must be 
+          tracked.  After all the Checks are complete if the number of Successes 
+          is greater than the Failures the character succeeds.  A Strict Challenge 
+          is the most difficult, and if the character fails a Check at any time 
+          during the Challenge they fail the Challenge.     
+        </p>
+        <p>
+          Depending on the type of Challenge failures can represent different things.  
+          They may simply denote that more time or more resources are required to 
+          complete the Challenge.  Alternately a character may suffer damage due 
+          to the stress of failure. 
+        </p>
+      </div>
+      <button v-on:click="close" type="button" class="btn btn-info btn-block">Home</button>
+    </template>
+    <template id="about">
+      <h3 class="center header">Cosmic Power Utilities</h3>
+      <div class="content">
+        <div class="center">
+          All the code to this is released open source under the </br>GNU General Public License v3.0.
+          <p class="strong"><em>This is free because the grace of God is free through His son Jesus.</em></p>
+        </div>
+        <p>This app was meant to help you with all your cosmic adventures.  
+        It is web based, but we are working on an offline version.  
+        It has a minimal design, and should work just as well on phones and tablets.
+        </p>
+        <p>You can save anything you create – and it will be saved locally to your device.  
+        When you come back you can load what you saved.  If you clear your history or cache for 
+        this page you will delete this data (so beware).
+        </p>
+        <strong>This RPG relies on data and rules from the following sources:</strong> 
+        <ul>
+          <li><a href="http://www.drivethrurpg.com/product/108028/Dungeon-World?affiliate_id=569798" class="strong">
+            <em>Dungeon World</em></a>, by Adam Koebel and Sage LaTorra, 
+          licensed under a Creative Commons Attribution 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/156979/The-Perilous-Wilds?affiliate_id=569798" class="strong">
+            <em>Perilous Wilds</em></a>, by Jason Lutes with assistance 
+          from Jeremy Strandberg, licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported license.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/86546/Swords-and-Wizardry-Complete-Rule-Book?affiliate_id=569798" class="strong">
+            <em>Swords and Wizardry Complete Rule Book</em></a>, 
+          by Matthew J. Finch licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/148169/White-Star-White-Box-Science-Fiction-Roleplaying-Swords--Wizardry?affiliate_id=569798" class="strong">
+            <em>White Star: White Box Science Fiction Rolelpaying</em></a>, 
+          by James M. Spahn licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/172576/Guardians?affiliate_id=569798" class="strong">
+            <em>Guardians</em></a>, 
+          by by David Pulver and Thomas Denmark licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/124392/d30-Sandbox-Companion?affiliate_id=569798" class="strong">
+            <em>d30 Sandbox Companion</em></a>, 
+          by Richard J. LeBlanc, Jr. licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/186894/Cepheus-Engine-System-Reference-Document?affiliate_id=569798" class="strong">
+            <em>Cepheus Engine System Reference Document</em></a>, 
+          by Jason “Flynn” Kemp licensed under the <span v-on:click="showOGL" class="innerLink">Open Game License Version 1.0a</span>.
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/185960/Godbound-A-Game-of-Divine-Heroes-Deluxe-Edition?affiliate_id=569798" class="strong">
+            <em>Godbound</em></a>, 
+          by Kevin Crawford ©2016, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/94621/Stars-Without-Number-Core-Edition?affiliate_id=569798" class="strong">
+            <em>Stars Without Number</em></a>, 
+          by Kevin Crawford ©2010-2011, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/127180/Scarlet-Heroes?affiliate_id=569798" class="strong">
+            <em>Scarlet Heroes</em></a>, 
+          by Kevin Crawford ©2014, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+          <li><a href="http://www.drivethrurpg.com/product/99063/An-Echo-Resounding-A-Sourcebook-for-Lordship-and-War?affiliate_id=569798" class="strong">
+            <em>An Echo, Resounding: A Sourcebook for Lordship and War</em></a>, 
+          by Kevin Crawford ©2012, Sine Nomine Publishing.  The JTeam makes no claim to ownership of this work.  
+          </li>
+        </ul>
+        <div>We hope you enjoy! <p>The JTeam</p></div>
+      </div>
+      <button v-on:click="close" type="button" class="btn btn-info btn-lg btn-block">Close</button>
+    </template>
+    <template id="OGL">
+      <h3 class="center header">OPEN  GAME LICENSE Version 1.0a</h3>
+      <p>The  following text is the property of Wizards of the Coast, Inc. and is  Copyright 2000 Wizards of the Coast, Inc (‘Wizards’). All Rights  Reserved.</p>
+      <p>1.  Definitions: (a)’Contributors’ means the copyright and/or  trademark owners who have contributed Open Game Content;  (b)’Derivative Material’ means copyrighted material including  derivative works and translations (including into other computer  languages), potation, modification, correction, addition, extension,  upgrade, improvement, compilation, abridgment or other form in which  an existing work may be recast, transformed or adapted; (c)  ‘Distribute’ means to reproduce, license, rent, lease, sell,  broadcast, publicly display, transmit or otherwise distribute;  (d)’Open Game Content’ means the game mechanic and includes the  methods, procedures, processes and routines to the extent such  content does not embody the Product Identity and is an enhancement  over the prior art and any additional content clearly identified as  Open Game Content by the Contributor, and means any work covered by  this License, including translations and derivative works under  copyright law, but specifically excludes Product Identity. (e)  ‘Product Identity’ means product and product line names, logos  and identifying marks including trade dress; artifacts; creatures  characters; stories, storylines, plots, thematic elements, dialogue,  incidents, language, artwork, symbols, designs, depictions,  likenesses, formats, poses, concepts, themes and graphic,  photographic and other visual or audio representations; names and  descriptions of characters, spells, enchantments, personalities,  teams, personas, likenesses and special abilities; places, locations,  environments, creatures, equipment, magical or supernatural abilities  or effects, logos, symbols, or graphic designs; and any other  trademark or registered trademark clearly identified as Product  identity by the owner of the Product Identity, and which specifically  excludes the Open Game Content; (f) ‘Trademark’ means the logos,  names, mark, sign, motto, designs that are used by a Contributor to  identify itself or its products or the associated products  contributed to the Open Game License by the Contributor (g) ‘Use’,  ‘Used’ or ‘Using’ means to use, Distribute, copy, edit,  format, modify, translate and otherwise create Derivative Material of  Open Game Content. (h) ‘You’ or ‘Your’ means the licensee in  terms of this agreement.</p>
+      <p>2.  The License: This License applies to any Open Game Content that  contains a notice indicating that the Open Game Content may only be  Used under and in terms of this License. You must affix such a notice  to any Open Game Content that you Use. No terms may be added to or  subtracted from this License except as described by the License  itself. No other terms or conditions may be applied to any Open Game  Content distributed using this License.</p>
+      <p>3.  Offer and Acceptance: By Using the Open Game Content You indicate  Your acceptance of the terms of this License.</p>
+      <p>4.  Grant and Consideration: In consideration for agreeing to use this  License, the Contributors grant You a perpetual, worldwide,  royalty-free, non-exclusive license with the exact terms of this  License to Use, the Open Game Content.</p>
+      <p>5.Representation  of Authority to Contribute: If You are contributing original material  as Open Game Content, You represent that Your Contributions are Your  original creation and/or You have sufficient rights to grant the  rights conveyed by this License.</p>
+      <p>6.Notice  of License Copyright: You must update the COPYRIGHT NOTICE portion of  this License to include the exact text of the COPYRIGHT NOTICE of any  Open Game Content You are copying, modifying or distributing, and You  must add the title, the copyright date, and the copyright holder’s  name to the COPYRIGHT NOTICE of any original Open Game Content you  Distribute.</p>
+      <p>7.  Use of Product Identity: You agree not to Use any Product Identity,  including as an indication as to compatibility, except as expressly  licensed in another, independent Agreement with the owner of each  element of that Product Identity. You agree not to indicate  compatibility or co-adaptability with any Trademark or Registered  Trademark in conjunction with a work containing Open Game Content  except as expressly licensed in another, independent Agreement with  the owner of such Trademark or Registered Trademark. The use of any  Product Identity in Open Game Content does not constitute a challenge  to the ownership of that Product Identity. The owner of any Product  Identity used in Open Game Content shall retain all rights, title and  interest in and to that Product Identity.</p>
+      <p>8.  Identification: If you distribute Open Game Content You must clearly  indicate which portions of the work that you are distributing are  Open Game Content.</p>
+      <p>9.  Updating the License: Wizards or its designated Agents may publish  updated versions of this License. You may use any authorised version  of this License to copy, modify and distribute any Open Game Content  originally distributed under any version of this License.</p>
+      <p>10.  Copy of this License: You MUST include a copy of this License with  every copy of the Open Game Content You Distribute.</p>
+      <p>11.  Use of Contributor Credits: You may not market or advertise the Open  Game Content using the name of any Contributor unless You have  written permission from the Contributor to do so.</p>
+      <p>12.  Inability to Comply: If it is impossible for You to comply with any  of the terms of this License with respect to some or all of the Open  Game Content due to statute, judicial order, or governmental  regulation then You may not Use any Open Game Material so affected.</p>
+      <p>13.  Termination: This License will terminate automatically if You fail to  comply with all terms herein and fail to cure such breach within 30  days of becoming aware of the breach. All sublicenses shall survive  the termination of this License.</p>
+      <p>14.  Reformation: If any provision of this License is held to be  unenforceable, such provision shall be reformed only to the extent  necessary to make it enforceable.</p>
+      <p>15.  COPYRIGHT NOTICE</p>
+      <p>Open  Game License v 1.0a Copyright 2000, Wizards of the Coast, Inc.</p>
+      <p>System Reference Document Copyright 2000-2003, Wizards of the Coast,
+         Inc.; Authors Jonathan Tweet, Monte Cook, Skip Williams, Rich Baker,
+         Andy Collins, David Noonan, Rich Redman, Bruce R. Cordell, John D.
+         Rateliff, Thomas Reid, James Wyatt, based on original material by E. Gary
+         Gygax and Dave Arneson.</p>
+         <p>Swords & Wizardry Core Rules, Copyright 2008, Matthew J. Finch</p>
+         <p>Swords & Wizardry Complete Rules, Copyright 2010, Matthew J. Finch</p>
+         <p>White Star: White Box Science Fiction Rolelpaying, Copyright 2015
+         Barrel Rider Games; Author James M. Spahn.</p>
+         <p>Monstrosities, Copyright 2012, Mythmere Games, published and distributed by Frog God Games.</p>
+         <p>Monster Compendium: 0e, Copyright 2008, Matthew J. Finch</p>
+         <p>Pathfinder RPG Bestiary, Copyright 2009, Paizo Publishing, LLC; Author: Jason Bulmahn, based on material by Jonathan Tweet, Monte Cook, and Skip Williams.</p>
+         <p>Tome of Horrors Complete, Copyright 2011, Necromancer Games, Inc., published and distributed by Frog God Games (Please see individual monster entries for complete and proper OGL referencing.)</p>
+         <p>Splinters of Faith, Copyright 2010, Author Gary Schotter & Jeff Harkness.</p>
+         <p>SW Monster Database, Copyright 2014, Author John Payne.</p>
+      <p>Old-School Adventures™
+         Accessory AX2: d30 Sandbox Companion,
+         Copyright © 2013, Richard J. LeBlanc, Jr./
+         New Big Dragon Games Unlimited</p>
+         <p>Guardians Core Rules, Copyright 2016, Night Owl Workshop, LLC.</p>
+      <p>Traveller  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
+      <p>Mercenary  System Reference Document Copyright © 2008, Mongoose Publishing.</p>
+      <p>High  Guard System Reference Document Copyright © 2008, Mongoose  Publishing.</p>
+      <p>Traveller is © 2008 Mongoose  Publishing. Traveller and related logos, character, names, and  distinctive likenesses thereof are trademarks of Far Future  Enterprises unless otherwise noted. All Rights Reserved. Mongoose  Publishing Ltd Authorized User.</p><p>Vehicle Handbook System Reference Document Copyright © 2012, Mongoose Publishing.</p>
+      <button v-on:click="close" type="button" class="btn btn-info btn-lg btn-block">Close</button>
+    </template>
+  </div>
+</body>
+
+  <script type="text/javascript" src="lib/vue.js"></script>
+  <script type="text/javascript" src="lib/localforage.min.js"></script>
+  <script type="text/javascript" src="lib/nedb.min.js"></script>
+  <script type="text/javascript" src="lib/jquery.noty.packaged.min.js"></script>
+  <script type="text/javascript" src="lib/chance.min.js"></script>
+  <script type="text/javascript" src="lib/createjs-2015.11.26.min.js"></script>
+  <script type="text/javascript" src="dev/app.js"></script>
+  <script type="text/javascript" src="dev/cpxdata.js"></script>
+  <script type="text/javascript" src="dev/notify.js"></script>
+  <script type="text/javascript" src="dev/page.js"></script>
+  <script type="text/javascript" src="dev/cpxrpg.js"></script>
+  <script type="text/javascript" src="dev/start-cpxrpg.js"></script>
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-87794453-2', 'auto');
+  ga('send', 'pageview');
+  </script>
+</html>
