@@ -1,40 +1,7 @@
-//main menu bar
-Vue.component('c-menubar', {
-  props: ['id','show'],
-  template:'<div class="btn-group btn-group-justified top-header" role="group">'+
-  '<div class="btn-group" role="group" v-if="show.new"><button @click="new" type="button" class="btn btn-info">New</button></div>'+
-  '<div class="btn-group" role="group" v-if="show.load"><button @click="load" type="button" class="btn btn-info">Load</button></div>'+
-  '<div class="btn-group" role="group" v-if="show.save"><button @click="save" type="button" class="btn btn-info">Save</button></div>' +
-  '<div class="btn-group" role="group" v-if="show.close"><button @click="close" type="button" class="btn btn-info">Close</button></div></div>',
-  methods: {
-    new: function (){ HUB.$emit(this.id+'-new',''); },
-    close: function (){ HUB.$emit(this.id+'-close',''); },
-    save: function (){ HUB.$emit(this.id+'-save',''); },
-    load: function (){ HUB.$emit(this.id+'-showload',''); }
-  }
-})
-//Load select tool for loading data
-Vue.component('c-loadselect', { 
-  props:['id','list','show'],
-  template: '\
-  <div class="center content" v-show="show"><select v-model="loadID">\
-  <option class="center" v-for="(key,val) in list" v-bind:value="key">{{val}}</option> </select>\
-  <button v-on:click="load" type="button" class="btn btn-info">Load</button></div>\
-  ',
-  data: function () {
-    return {
-      loadID: ''
-    }
-  },
-  methods: {
-    load: function () {
-      var VU = this;
-      CPXSAVE.getItem(this.loadID).then(function(obj) {
-        HUB.$emit(VU.id+'-loadObj',obj);
-      });
-    }
-  }
-})
+/*
+ V 1.3
+ Refactor to move bars to the pagejs
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 var vMainMenu = new Vue({
@@ -64,7 +31,7 @@ var vMainMenu = new Vue({
     },
     IncursionGen: function(){
       this.show = false;
-      CPX.vue.page.open('c-cpi','slim');
+      CPX.vue.page.open('c-cpi','');
     },
     InvestigationGen: function(){
       this.show = false;

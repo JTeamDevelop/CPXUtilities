@@ -212,61 +212,69 @@ Vue.component('c-cpi-sector', {
     }
   }
 })
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-cpi', { 
   template: '\
-  <div>\
-  <h2 class="center">CPX Incursion Builder</h2>\
-  <c-menubar id="CPI" v-bind:show="showmenu"></c-menubar>\
-  <c-loadselect id="CPI" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
-  <div class="content-minor center">\
-    <a role="button" class="btn btn-info center bottom-pad" href="cpxrpg.html">What are Incursions</a>\
-    <input class="form-control input-lg center" type="text" v-model="content.name" placeholder="NAME">\
-    <textarea class="form-control" type="textarea" v-model="content.notes" placeholder="ADD NOTES"></textarea>\
-    <div class="input-group">\
-      <span class="input-group-addon" id="cpi-addon-i">Average CL</span>\
-      <input class="form-control" type="number" v-model="content.ACL" min=1>\
-    </div>\
-    <div class="input-group">\
-      <span class="input-group-addon" id="cpi-addon-i">Threat Level</span>\
-      <input class="form-control" type="number" v-model="content.T" min=1 @change="change">\
-      <span class="input-group-btn">\
-        <button v-on:click="trandom" type="button" class="btn btn-info">Random</button>\
-      </span>\
-    </div>\
-    <p v-show="content.Ttxt.length>0">{{content.Ttxt}}</p>\
-  </div>\
-  <div class="center">\
-    <button v-on:click="add" type="button" class="btn btn-info">Add Sector Map</button>\
-    <button v-on:click="reset" type="button" class="btn btn-info">Reset All Sectors</button>\
-  </div>\
-  <h4 class="center bar-bottom">Foes \
-    <button v-on:click="foe" type="button" class="btn btn-sm">\
-      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>\
-    </button>\
-  </h4>\
-  <div v-for="foe in content.foes">\
-    <div class="input-group">\
-      <input class="form-control" type="text" v-model="foe.text" @change="change">\
-      <span class="input-group-btn">\
-        <button v-on:click="rfoe($index)" type="button" class="btn">\
-          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+  <div class="slim center-div box">\
+    <c-map-footer v-bind:map="map" v-bind:mapd="mapd"></c-map-footer>\
+    <h2 class="center" v-show="!mapd.minimal">CPX Incursion Builder</h2>\
+    <h4 class="center header" v-show="mapd.minimal">{{content.name}}</h4>\
+    <div v-show="!mapd.minimal">\
+      <c-menubar id="CPI" v-bind:show="showmenu"></c-menubar>\
+      <c-loadselect id="CPI" v-bind:list="allgens" v-bind:show="showlist.load"></c-loadselect>\
+      <div class="content-minor center">\
+        <a role="button" class="btn btn-info center bottom-pad" href="cpxrpg.html">What are Incursions</a>\
+        <input class="form-control input-lg center" type="text" v-model="content.name" placeholder="NAME">\
+        <textarea class="form-control" type="textarea" v-model="content.notes" placeholder="ADD NOTES"></textarea>\
+        <div class="input-group">\
+          <span class="input-group-addon" id="cpi-addon-i">Average CL</span>\
+          <input class="form-control" type="number" v-model="content.ACL" min=1>\
+        </div>\
+        <div class="input-group">\
+          <span class="input-group-addon" id="cpi-addon-i">Threat Level</span>\
+          <input class="form-control" type="number" v-model="content.T" min=1 @change="change">\
+          <span class="input-group-btn">\
+            <button v-on:click="trandom" type="button" class="btn btn-info">Random</button>\
+          </span>\
+        </div>\
+        <p v-show="content.Ttxt.length>0">{{content.Ttxt}}</p>\
+      </div>\
+      <div class="center">\
+        <button v-on:click="addmap" type="button" class="btn btn-info">Add Sector Map</button>\
+        <button v-on:click="reset" type="button" class="btn btn-info">Reset All Sectors</button>\
+      </div>\
+      <h4 class="center bar-bottom">Foes \
+        <button v-on:click="foe" type="button" class="btn btn-sm">\
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>\
         </button>\
-      </span>\
-    </div>\
-    <div class="input-group">\
-      <span class="input-group-addon" id="cpi-addon-i">Type</span>\
-      <select class="form-control" v-model="foe.type" @change="change">\
-        <option v-for="ft in foetypes" v-bind:value="ft">{{ft}}</option>\
-      </select>\
+      </h4>\
+      <div v-for="foe in content.foes">\
+        <div class="input-group">\
+          <input class="form-control" type="text" v-model="foe.text" @change="change">\
+          <span class="input-group-btn">\
+            <button v-on:click="rfoe($index)" type="button" class="btn">\
+              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+            </button>\
+          </span>\
+        </div>\
+        <div class="input-group">\
+          <span class="input-group-addon" id="cpi-addon-i">Type</span>\
+          <select class="form-control" v-model="foe.type" @change="change">\
+            <option v-for="ft in foetypes" v-bind:value="ft">{{ft}}</option>\
+          </select>\
+        </div>\
+      </div>\
+      <h4 class="center bar-bottom">Sectors \
+        <button v-on:click="add" type="button" class="btn btn-sm">\
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>\
+        </button>\
+      </h4>\
+      <c-cpi-sector v-for="S in content.sectors" v-bind:S="S" v-bind:I="content" v-bind:idx="$index"></c-cpi-sector>\
     </div>\
   </div>\
-  <h4 class="center bar-bottom">Sectors \
-    <button v-on:click="add" type="button" class="btn btn-sm">\
-      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>\
-    </button>\
-  </h4>\
-  <c-cpi-sector v-for="S in content.sectors" v-bind:S="S" v-bind:I="content" v-bind:idx="$index"></c-cpi-sector>\
+  <div id="{{map._id}}" class="map active" v-bind:class="mapd.front" v-show="showlist.map">\
+    <canvas width="{{bounds.x}}" height="{{bounds.y}}"></canvas>\
   </div>\
   ',
   data: function () {
@@ -278,10 +286,18 @@ Vue.component('c-cpi', {
         save:true,
         close:true
       },
-      showlist: {load:false},
+      showlist: {
+        load:false,
+        map:true,
+      },
       content: {},
+      map:{},
       foetypes:['minion','elite','lieutenant','boss'],
-      allgens: {}
+      allgens: {},
+      mapd:{
+        front: 'back',
+        minimal:false,
+      }
     }
   },
   //called when created
@@ -294,15 +310,40 @@ Vue.component('c-cpi', {
     HUB.$off('CPI-change', this.change);
   },
   computed: {
-    countdown: function(){
-      var max = 10 * this.content.sectors.length, nex = 0;
-      this.content.sectors.forEach(function(el) {
-        nex+=el.explored.length;
-      });
-      return max-nex;
-    }
+    bounds : function(){
+      if(this.hasmap){
+        return this.map.bounds;
+      }
+      else { return {x:0,y:0}; } 
+    },
+    hasmap: function(){
+      return objExists(this.map.cells);
+    },
   },
   methods: {
+    frontback:function(){
+      if(this.front=='front'){this.front='back';}
+      else {this.front='front';}
+    },
+    addmap: function(){
+      //clear the old map display so clicks register
+      CPX.display.clearActive(this.map);
+      //random seed - can be changed
+      this.content.mapseed = ['CPH','-',CPXC.string({length: 27, pool: base62})]
+      //set the map
+      this.map = CPX.hexMap({
+        seed: this.content.mapseed,
+        parent : this.content._id,
+        nZones : this.content.sectors.length,
+        visible: ['all']
+      });
+      //update after vue/canvas has been updated
+      Vue.nextTick(this.display); 
+    },
+    display: function () {
+      //send the vue to the display function
+      CPX.display.hexMap(this.map);
+    },
     reset: function(){
       var I=this.content;
       //reset encountered
@@ -339,7 +380,7 @@ Vue.component('c-cpi', {
       CPX.CPI.eliteShuffle(I);
     },
     trandom: function (){
-      var r = CPXC.diceSum('2d6'), mod = 0, ACL = Number(this.content.ACL), T=0, OT=thus.content.T;
+      var r = CPXC.diceSum('2d6'), mod = 0, ACL = Number(this.content.ACL), T=0, OT=this.content.T;
       //set the text to null 
       Vue.set(this.content,'Ttxt','');
       

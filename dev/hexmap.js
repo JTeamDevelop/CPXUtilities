@@ -40,6 +40,8 @@ CPX.hexMap = function (opts) {
     seed : typeof opts.seed === "undefined" ? [CPXC.string({length: 32, pool: base62})] : opts.seed,
     cells : {},
     zones : [],
+    selected: [],
+    tokens:[],
     mods : {}
   }
 
@@ -48,7 +50,7 @@ CPX.hexMap = function (opts) {
   //parent if contained in another object
   map.parent = typeof opts.parent === "undefined" ? "" : opts.parent;
   //classes of the map
-  map.class = typeof opts.class === "undefined" ? ['hexMap'] : opts.class;
+  map.class = typeof opts.class === "undefined" ? ['hexMap','pointy'] : opts.class;
   map.special = typeof opts.special === "undefined" ? [] : opts.special;
   //number of cell zones
   map._nZones = typeof opts.nZones === "undefined" ? -1 : opts.nZones;
@@ -104,7 +106,7 @@ CPX.hexMap = function (opts) {
   //identify neighboors and bounds for display
   CPX.hexMap.zoneNeighboors(map);
   CPX.hexMap.bounds(map);
-
+  
   //save the options provided
   map.opts = opts;
   //setup the NEDB to hold the mods

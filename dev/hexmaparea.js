@@ -51,7 +51,6 @@ CPX.rectHexArea = function (opts) {
   //populate cells
   CPX.rectHexArea.addCells(map);
 
-  
   return map;
 }
 CPX.rectHexArea.addCells = function (map){
@@ -252,7 +251,8 @@ Vue.component('c-cha', {
     <c-cha-cell v-for="cid in map.selected" v-bind:cell="map.cells[cid]" v-bind:mid="map._id"></c-cha-cell>\
   </div>\
   <div id="{{map._id}}" class="map active" v-bind:class="front" v-show="showlist.map">\
-    <canvas width="{{bounds.x}}" height="{{bounds.y}}"></canvas></div>\
+    <canvas width="{{bounds.x}}" height="{{bounds.y}}"></canvas>\
+  </div>\
   <div class="footer box strong slim">\
     <div class="center">\
       <div class="btn-group" role="group" aria-label="...">\
@@ -332,7 +332,7 @@ Vue.component('c-cha', {
       if(this.showlist.minimal){return 'glyphicon-plus';}
       return 'glyphicon-minus';
     }
-  },
+  }, 
   methods: {
     make:function(){
       this[this.type]();

@@ -93,6 +93,9 @@
 .background-white {
   background-color: white;
 }
+.background-white-semi {
+  background-color: rgba(255,255,255,0.5);
+}
 .height-limit-min {
   max-height:400px;
   overflow-y: auto;
@@ -120,9 +123,14 @@ Maps
 .map {
   position: fixed;
   width:100%;
-  top:40px;
-  bottom:65px;
+  top:50px;
+  bottom:0px;
   overflow:scroll;
+}
+.map.planet {
+  top:0;
+  z-index:-10;
+  overflow:hidden;
 }
 .map canvas {
   display: block;
