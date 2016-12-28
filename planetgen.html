@@ -19,6 +19,14 @@
       <component v-bind:is="currentView"></component>
       <div id="viewportFrame" class="map planet" style="background-image: url(star-background.png); background-repeat: repeat;"></div>
     </div>
+    <div class="notify" id="mainNotify" v-show="show" v-cloak>
+      <h3 class="header center">{{header}}</h3>
+      <div class="content">{{{content}}}</div>
+      <component v-bind:is="currentView"></component>
+      <div v-show="showclose" class="center">
+        <button v-on:click="close" type="button" class="btn btn-info">Close</button>
+      </div>
+    </div>
 
     <div class="hidden">
   		<div id="helpPanel" class="panel" style="position: absolute; left: 1em; top: 1em; width: 30em; height: 13em;">
@@ -175,8 +183,13 @@
   <script src="https://d3js.org/d3.v4.js"></script>
   <script type="text/javascript" src="lib/rhill-voronoi-core.js"></script>
   <script type="text/javascript" src="lib/geoVoronoi.js"></script>
+  <script type="text/javascript" src="lib/d3-geo-projection.v1.min.js"></script>
   <script type="text/javascript" src="dev/app.js"></script>
+  <script type="text/javascript" src="dev/cpxdata.js"></script>
   <script type="text/javascript" src="dev/page.js"></script>
+  <script type="text/javascript" src="dev/notify.js"></script>
+  <script type="text/javascript" src="dev/swmonster.js"></script>
+  <script type="text/javascript" src="dev/cpxpeople.js"></script>
   <script type="text/javascript" src="dev/planet-generator.js"></script>
   <script type="text/javascript" src="dev/planetgen-voronoi.js"></script>
   <script type="text/javascript" src="dev/planetgen-vue.js"></script>
@@ -186,7 +199,7 @@
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-87794453-1', 'auto');
+  ga('create', 'UA-87794453-2', 'auto');
   ga('send', 'pageview');
   </script>
 </html>
