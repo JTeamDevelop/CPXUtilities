@@ -1,6 +1,5 @@
-/* Version 1.0
-  Core funcitonality for selecting monsters from the DB and saving them as new
-  Added random generation for Dragons and Undead
+/* Version 1.1
+  Moded animal gen to take seeded RNG
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.data.SWMonsters = {
@@ -95,24 +94,28 @@ CPX.SW.size = function (CL){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.SW.animalGen = function(opts){
   opts = typeof opts === "undefined" ? {} : opts;
+  
+  var RNG = typeof opts.RNG === "undefined" ? CPXC : opts.RNG;
   var weight = typeof opts.weight === "undefined" ? 25 : opts.weight,
   n = typeof opts.n === "undefined" ? 1 : opts.n;
   
-  var SWM = CPX.data.SWMonsters, terrain='', R = [], air=false; 
+  var SWM = CPX.data.SWMonsters, terrain='', R = [], ta=[]; 
   for(var i=0; i<n; i++){
     //bug
-    if(weight==100 || weight>0 && CPXC.bool({likeliehood:weight})){
-      terrain = CPXC.weighted(SWM.bug[0],SWM.bug[1]);  
-      R.push(CPXC.pickone(SWM[terrain]));
+    if(weight==100 || weight>0 && RNG.bool({likeliehood:weight})){
+      terrain = RNG.weighted(SWM.bug[0],SWM.bug[1]);  
+      R.push(RNG.pickone(SWM[terrain]));
     }
     //animal
     else {
-      terrain = CPXC.weighted(SWM.animal[0],SWM.animal[1]);
-      R.push(CPXC.pickone(SWM[terrain]));
+      terrain = RNG.weighted(SWM.animal[0],SWM.animal[1]);
+      R.push(RNG.pickone(SWM[terrain]));
     }
-    if(terrain.includes('air')){air=true;}
+    
+    if(terrain.includes('air')){ta.push('air');}
+    if(terrain.includes('water')){ta.push('water');}
   }
-  return [R,air];
+  return [R,ta];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.SW.attackGen = function(CL,n,str){
@@ -614,7 +617,7 @@ CPX.SW.chimerae = function (CL,n){
     ]));
   }
   //flight
-  if(form[1]){ 
+  if(form[1].includes('air')){ 
     modset0.push(QP.fly(0)); 
     if(CPXC.bool()){ modset4.push(QP.fly(0)); }
     else { modset4.push(QP.fly(1)); }

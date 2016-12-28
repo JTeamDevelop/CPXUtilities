@@ -3101,7 +3101,7 @@ function selectTile(tile)
 	}
 	
 	console.log(tile);
-	VU.setTile(tile);
+	VU.setTile(tile.id);
 	
 	var outerColor = new THREE.Color(0x000000);
 	var innerColor = new THREE.Color(0xFFFFFF);

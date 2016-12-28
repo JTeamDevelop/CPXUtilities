@@ -3,17 +3,6 @@
 
 */
 
-const HEXSITES = {
-  all: ['town','stronghold','lair','natural','ruin','resource','other'],
-  town:{class:['town'],color:'black'},
-  stronghold:{class:['stronghold'],color:'green'},
-  ruin:{class:['ruin'],color:'grey'},
-  natural:{class:['natural'],color:'blue'},
-  resource:{class:['resource'],color:'yellow'},
-  lair:{class:['lair'],color:'red'},
-  other:{class:['ruin'],color:'orange'}
-} 
-
 CPX.data.worldTemplate = {
   _id:'',
   CPXseed:[],
@@ -78,6 +67,11 @@ Vue.component('c-expgen-header', {
   props:['world','show'],
   template: '\
   <div class="box strong slim" v-if="world._id.length>0">\
+    <div class="btn-group btn-group-justified top-header" role="group">\
+      <div class="btn-group" role="group" ><button @click="changeProjection(`globe`)" type="button" class="btn btn-info">Globe</button></div>\
+      <div class="btn-group" role="group" ><button @click="changeProjection(`rectangular`)" type="button" class="btn btn-info">Rectangular</button></div>\
+      <div class="btn-group" role="group" ><button @click="changeProjection(`hammer`)" type="button" class="btn btn-info">Hammer</button></div>\
+    </div>\
     <div class="center">\
       <div class="btn-group" role="group" aria-label="...">\
         <button v-on:click="show.min=!show.min" type="button" class="btn">\
@@ -85,14 +79,26 @@ Vue.component('c-expgen-header', {
         </button>\
         <button v-on:click="zoom(-1)" type="button" class="btn" v-if="CPXworld">Z <span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>\
         <button v-on:click="zoom(1)" type="button" class="btn" v-if="CPXworld">Z <span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>\
-        <button v-on:mousedown="long(-1)" v-on:mouseup="stop" type="button" class="btn"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></button>\
-        <button v-on:mousedown="lat(-1)" v-on:mouseup="stop" type="button" class="btn"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>\
-        <button v-on:mousedown="lat(1)" v-on:mouseup="stop" type="button" class="btn"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>\
-        <button v-on:mousedown="long(1)" v-on:mouseup="stop" type="button" class="btn"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span></button>\
+        <button v-on:click="long(-1)" type="button" class="btn"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></button>\
+        <button v-on:click="lat(-1)" type="button" class="btn"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>\
+        <button v-on:click="lat(1)" type="button" class="btn"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>\
+        <button v-on:click="long(1)" type="button" class="btn"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span></button>\
+      </div>\
+      <div class="input-group" v-if="!CPXworld">\
+        <span class="input-group-addon strong">Show</span>\
+        <select class="form-control" v-model="currentshow" @change="showwhat">\
+          <option class="center" v-for="item in showlist" v-bind:value="item">{{item}}</option>\
+        </select>\
       </div>\
     </div>\
   <div>\
   ',
+  data:function(){
+    return {
+      showlist: ['people','town','stronghold','lair','natural','ruin','resource','other'],
+      currentshow:'people'
+    }
+  },
   computed: {
     CPXworld : function(){
       if(this.world.CPXseed[0]=='CPP') {return false;}
@@ -100,71 +106,108 @@ Vue.component('c-expgen-header', {
     }
   },
   methods: {
+    showwhat:function(){
+      CPXDB[this.world._id].show = this.currentshow;
+      //calc points for display
+      CPXDB[this.world._id].pointCalc();
+      //display
+      CPXDB[this.world._id].d3Globe(); 
+    },
+    changeProjection: function(type) {
+      CPXDB[this.world._id].setProjection(type);
+    },
     stop: function(){
-      G.stop();
+      CPXDB[this.world._id].stop();
     },
     zoom: function(n){
       CPX.EXP.zoom = Number(n);
     },
     lat: function(n){
-      G.animate(false,Number(n));
+      CPXDB[this.world._id].turn(false,Number(n));
       CPX.EXP.latdelta = Number(n);
     },
     long: function(n){
-      G.animate(true,Number(n));
+      CPXDB[this.world._id].turn(true,Number(n));
       CPX.EXP.longdelta = Number(n);
     }
   }
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-expgen-site', {
-  props:['site','tile','idx','world'],
-  template: ''+
-  '<div v-if="show">'+
-    '<div class="input-group strong">'+
-      '<input class="form-control" type="text" v-model="site.name" placeholder="NAME" @change="mod">'+
-      '<span class="input-group-btn">'+
-        '<button v-on:click="removeSite" type="button" class="btn"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>'+
-      '</span>'+
-    '</div>'+
-    '<div class="input-group strong" >'+
-      '<span class="input-group-addon strong">Type</span>'+
-      '<select class="form-control" v-model="site.class[0]" @change="mod">'+
-        '<option class="center" v-for="site in hexsites.all" v-bind:value="site">{{site | capitalize}}</option>'+
-      '</select>'+
-      '<span class="input-group-addon strong">Size</span>'+
-      '<select class="form-control" v-model="site.size" @change="mod" v-if="site.class[0]==`town`">'+
-        '<option class="center" v-for="size in citysize" v-bind:value="$index">{{size | capitalize}}</option>'+
-      '</select>'+
-      '<input class="form-control" type="number" v-model="site.size" v-else>'+
-    '</div>'+
-  '</div>',
+  props:['tid','idx','world'],
+  template: '\
+  <div v-if="show">\
+    <div class="input-group strong">\
+      <component v-if="type.length>0" v-bind:is="type" v-bind:wid="world._id" v-bind:id="site.id"></component>\
+      <input class="form-control" type="text" v-model="site.name" placeholder="NAME" @change="mod" v-if="type.length==0">\
+      <span class="input-group-btn">\
+        <button v-on:click="removeSite" type="button" class="btn"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>\
+      </span>\
+    </div>\
+    <div class="input-group strong" v-if="type.length==0">\
+      <span class="input-group-addon strong">Type</span>\
+      <select class="form-control" v-model="site.class[0]" @change="mod">\
+        <option class="center" v-for="site in hexsites.all" v-bind:value="site">{{site | capitalize}}</option>\
+      </select>\
+      <span class="input-group-addon strong">Size</span>\
+      <select class="form-control" v-model="site.size" @change="mod" v-if="site.class[0]==`town`">\
+        <option class="center" v-for="size in citysize" v-bind:value="$index">{{size | capitalize}}</option>\
+      </select>\
+      <input class="form-control" type="number" v-model="site.size" v-else>\
+    </div>\
+  </div>\
+  ',
   data: function(){
     return {
+      show:true,
+      type: '',
       hexsites: HEXSITES,
       citysize :  ['single dwelling','thorp','hamlet','village','town, small',
                  'town, large','city, small','city, large','metropolis, small','metropolis, large'],
     }
   },
   computed: {
-    show : function(){
-      return objExists(this.site.class);
-    },
-    data: function(){
-      return {
-        name: this.tile.name,
-        notes: this.tile.notes,
-        special: this.tile.special,
-        display: this.tile.display
+    site: function(){
+      var s = this.tile.special[this.idx];
+      if(['empire','people'].includes(s.class[0])) {
+        this.type='c-cpx'+s.class[0];
       }
+      else {this.type='';}
+      return s;
+    },
+    tile: function(){
+      var t = {};
+      if(this.world.CPXseed[0]=='CEXP'){
+        t = planet.topology.tiles[this.tid];
+      }
+      else {
+        t = CPXDB[this.world._id].poly[this.tid];
+      }
+      if(objExists(this.world.mods[this.tid])){
+        var data = this.world.mods[this.tid];
+        for(var x in data){
+          t[x] = data[x];
+        }
+      }
+      return t;
     }
   },
   methods: {
     mod:function(){
-      HUB.$emit('EXP-mod',{
-        id: this.tile.id,
-        data:this.data,
-      });
+      if(['people','empire'].includes(this.site.class[0])){
+        CPXDB[this.world._id][this.site.class[0]+'s'][this.site.id].name = this.site.name;
+        
+        HUB.$emit('EXP-mod',{
+          id: this.site.id,
+          data:{name:this.site.name},
+        });
+      }
+      else {
+        HUB.$emit('EXP-mod',{
+          id: this.tile.id,
+          data:this.tile.save(),
+        });  
+      }
     },
     removeSite: function(){
       //remove the display
@@ -173,6 +216,7 @@ Vue.component('c-expgen-site', {
       }
       //remove the special
       this.tile.special.splice(this.idx,1);
+      this.show=false;
       //mod
       this.mod();
     }
@@ -181,7 +225,7 @@ Vue.component('c-expgen-site', {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Vue.component('c-expgen-tile', { 
-  props:['tile','world'],
+  props:['tid','world'],
   template: '\
   <div class="content-minor">\
     <h4 class="header center">{{terrain | capitalize}}\
@@ -191,10 +235,10 @@ Vue.component('c-expgen-tile', {
     </h4>\
     <input class="form-control center" type="text" v-model="tile.name" placeholder="NAME" @change="mod">\
     <textarea class="form-control" type="textarea" v-model="tile.notes" placeholder="ADD NOTES" @change="mod"></textarea>\
-    <h4 class="center">Sites \
-      <button v-on:click="addSite" type="button" class="btn btn-sm"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>\
-    </h4>\
-    <c-expgen-site v-if="tile.special.length>0" v-for="site in tile.special" v-bind:site="site" v-bind:tile="tile" v-bind:idx="$index" v-bind:world="world"></c-expgen-site>\
+    <h5 class="center strong bar-bottom">Sites \
+      <button v-on:click="addSite" type="button" class="btn btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>\
+    </h5>\
+    <c-expgen-site v-if="tile.special.length>0" v-for="site in tile.special" v-bind:tid="tid" v-bind:idx="$index" v-bind:world="world"></c-expgen-site>\
   </div>\
   ',
   data: function(){
@@ -202,6 +246,24 @@ Vue.component('c-expgen-tile', {
     }
   },
   computed : {
+    tile: function(){
+      var t={};
+
+      if(this.world.CPXseed[0]=='CEXP'){
+        t= planet.topology.tiles[this.tid];
+      }
+      else {
+        t= CPXDB[this.world._id].poly[this.tid];
+      }
+      
+      if(objExists(this.world.mods[this.tid])){
+        var data = this.world.mods[this.tid];
+        for(var x in data){
+          t[x] = data[x];
+        }
+      }
+      return t;
+    },
     terrain: function (){
       var T= {
         oceanGlacier: 'ocean Glacier',rainForest:'rain Forest', deciduousForest:'deciduous Forest', 
@@ -210,14 +272,6 @@ Vue.component('c-expgen-tile', {
       if(objExists(T[this.tile.terrain])) {return T[this.tile.terrain];}
       return this.tile.terrain;
     },
-    data: function(){
-      return {
-        name: this.tile.name,
-        notes: this.tile.notes,
-        special: this.tile.special,
-        display: this.tile.display
-      }
-    }
   },
   methods: {
     remove: function(){
@@ -226,11 +280,11 @@ Vue.component('c-expgen-tile', {
     mod:function(){
       HUB.$emit('EXP-mod',{
         id: this.tile.id,
-        data:this.data,
+        data:this.tile.save(),
       });
     },
     addSite: function(){
-      this.tile.special.push({class:['']});
+      this.tile.special.push({id:CPXC.string({length: 33, pool: base62}),class:['']});
       if (this.world.CPXseed[0]=='CEXP' && this.tile.display==''){
         CPX.display.tileObject(this.tile) 
       }
@@ -273,10 +327,22 @@ Vue.component('c-planetgen', {
       <div class="content-minor" v-if="!showlist.gen">\
         <input class="form-control input-lg center" type="text" v-model="world.name" placeholder="NAME">\
         <textarea class="form-control" type="textarea" v-model="world.notes" placeholder="ADD NOTES"></textarea>\
+        <div v-if="world.CPXseed[0]==`CPP`">\
+          <div class="input-group">\
+            <span class="input-group-addon strong">Age</span>\
+            <select class="form-control center" v-model="world.age">\
+              <option v-for="age in ages" v-bind:value="age[0]">{{age[1]}}</option>\
+            </select>\
+            <span class="input-group-btn">\
+              <button v-on:click="populate" type="button" class="btn btn-info">Populate</button>\
+            </span>\
+          </div>\
+        </div>\
       </div>\
     </div>\
-    <c-expgen-tile v-for="tile in tiles" v-bind:tile="tile" v-bind:world="world"></c-expgen-tile>\
+    <c-expgen-tile v-for="tile in tiles" v-bind:tid="tile" v-bind:world="world"></c-expgen-tile>\
   </div>\
+  <div class="loader" v-show="showlist.loader">Loading...</div>\
   ',
   data: function () {
     return {
@@ -292,8 +358,15 @@ Vue.component('c-planetgen', {
         load:false,
         gen:true,
         min: false,
+        loader:false,
       },
       type: '',
+      ages: [
+        ['PreAntiquity','PreAntiquity'],
+        ['Antiquity','Antiquity'],
+        ['Sail','Age of Sail'],
+        ['PreModern','PreModern'],
+        ],
       world: {
         _id:'',
         CPXseed:[],
@@ -305,7 +378,8 @@ Vue.component('c-planetgen', {
         moisture: 0,
         name:'',
         notes:'',
-        mods:{}
+        mods:{},
+        age:''
       },
       tiles: [],
       allgens: {}
@@ -321,8 +395,12 @@ Vue.component('c-planetgen', {
     VU =null;
   },
   computed: {
+    id:function(){return this.world.CPXseed.join('');}
   },
   methods: {
+    populate: function(){
+      CPXDB[this.id].populate(this.world.age);
+    },
     EXPgen: function(){
       var VU = this;
       CPX.experilousSetup().then(function(){
@@ -330,16 +408,24 @@ Vue.component('c-planetgen', {
       })
     },
     CPXMapGen: function(){
+      this.showlist.loader = true;
       this.world.seed = this.world.CPXseed = ['CPP','-',CPXC.string({length: 27, pool: base62})];
-
-      G = new voronoiGlobe(this.world);
       
-      this.showlist.gen = false;
+      var VU= this;
+      setTimeout(function(){ 
+        id = VU.id;
+        CPXDB[id] = new voronoiGlobe(VU.world);
+        
+        VU.showlist.gen = false;
+        
+        VU.world._id = CPXDB[id]._id;
+        VU.world.name = CPXDB[id].name;
+        
+        CPXDB[id].d3Display().then(function(){
+          VU.showlist.loader = false;  
+        });
+      }, 1000);
       
-      this.world._id = G._id;
-      this.world.name = G.name;
-
-      G.d3Display();
     },
     close:function(){
       location.href = "index.html";
@@ -349,56 +435,49 @@ Vue.component('c-planetgen', {
       deselectTile();
     },
     applyMods:function(){
-      var mod = {};
-      for(x in this.world.mods){
-        //pull the mod
-        mod = this.world.mods[x];
-        //set the id
-        mod.id = x;
-        //if there is a special - display it
-        if(mod.special.length>0){
-          CPX.display.tileObject(mod);
+      var W = CPXDB[this.id], mod = {}, obj={};
+      
+      if(this.world.CPXseed[0]=='CPP'){
+        //loop through mods
+        for(x in this.world.mods){
+          //set the mod
+          mod = this.world.mods[x];
+          //find the poly/tile if it is
+          if(objExists(W.poly[x])){ obj = W.poly[x]; }
+          //otherwise find the people/empire
+          else { obj = W.objectFind(x); }
+          //apply mods to object
+          for(y in mod){ obj[y] = mod[y]; }
         }
-      } 
+      }
+      else {
+        var mod = {};
+        for(x in this.world.mods){
+          //pull the mod
+          mod = this.world.mods[x];
+          //set the id
+          mod.id = x;
+          //if there is a special - display it
+          if(mod.special.length>0){
+            CPX.display.tileObject(mod);
+          }
+        }   
+      }
     },
     mod:function(opts){
       //pass data to mod db
       this.world.mods[opts.id] = opts.data;
       if(this.world.CPXseed[0]=='CPP'){
         //update and align mods
-        G.opts.mods = this.world.mods; 
+        CPXDB[this.id].opts.mods = this.world.mods; 
         //calc points for display
-        G.pointCalc();
+        CPXDB[this.id].pointCalc();
         //display
-        G.d3Globe();  
+        CPXDB[this.id].d3Globe();  
       }
     },
-    setTile: function (tile){
-      var t = {
-        name:'',
-        notes: '',
-        special:[],
-        display:'',
-        position:tile.position,
-        id: tile.id,
-      }
-      
-      if(this.world.CPXseed[0]=='CEXP'){
-        t.terrain = tile.biome;
-        t.elevation = tile.elevation;
-        t.moisture = tile.moisture;
-        t.tempurature = tile.temperature;
-      }
-      else {t.terrain=tile.terrain;}
-      
-      if(objExists(this.world.mods[tile.id])){
-        var data = this.world.mods[tile.id];
-        for(var x in data){
-          t[x] = data[x];
-        }
-      }
-      
-      this.tiles = [t];
+    setTile: function (tid){
+      this.tiles = [tid];
     },
     load: function (W) {
       this.new(); 
@@ -415,9 +494,10 @@ Vue.component('c-planetgen', {
         })
       }
       else {
-        G = new voronoiGlobe(W);
+        CPXDB[W._id] = new voronoiGlobe(W);
         this.showlist.gen = false;
-        G.d3Display();
+        CPXDB[W._id].d3Display();
+        this.applyMods();
       }
     },
     save: function () {

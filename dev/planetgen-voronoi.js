@@ -13,6 +13,7 @@ const TERRAINS = [
   {id:"hill",color: "Brown", hex:'#A52A2A'},
   {id:"mountain",color: "DarkGrey", hex:'#A9A9A9'}
 ];
+
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 function voronoiGlobe (opts) {
@@ -39,41 +40,57 @@ function voronoiGlobe (opts) {
   
   this.selected=[];
   this.points = [];
+  this.show = 'people';
 }
 /////////////////////////////////////////////////////////////////////////////////
-voronoiGlobe.prototype.flatVoronoi = function(){
-  //coordinates on a globe
-  var coords = d3.range(this.n).map(function() {
-    return {
-      x : G.RNG.floating({min:0,max:360}), 
-      y: G.RNG.floating({min:-90,max:90})
-    }
-  });
-  
-  this.voronoi = new Voronoi();
-  
-  this.diagram = this.voronoi.compute(coords,{xl: 0, xr: 360, yt: -90, yb: 90});
-  
-  this.poly = this.diagram.cells.map(function(el,i){
-    var np = {
-      id:i,
-      site: el.site,
-      terrain: 'water',
-      coordinates:[],
-      properties:{
-        neighbours: el.getNeighborIds()
-      }
-    }
-    el.halfedges.forEach(function(he) {
-      var start = he.getStartpoint();
-      np.coordinates.push([start.x,start.y]);
-    });
-    
-    np.coordinates = [np.coordinates];
-    return np;
-  })
-  
+voronoiGlobe.prototype.objectFind = function(id){
+  if(objExists(this.peoples[id])) {return this.people[id];}
+  if(objExists(this.empires[id])) {return this.empires[id];}
 }
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.setProjection = function(type){
+  this.projectionType = 'type';
+  
+  var context = canvas.node().getContext("2d");
+  
+  var width = canvas.node().width,
+      height = canvas.node().height;
+ 
+  
+  if(type=='globe'){
+    //set the projection we will use
+    this.projection = d3.geoOrthographic()
+        .scale(height / 2.25)
+        .translate([width / 2, height / 2])
+        .clipAngle(90)
+        .precision(.2);
+  }
+  else if(type=='rectangular'){
+    //set the projection we will use
+    this.projection = d3.geoEquirectangular()
+         .scale(height / Math.PI)
+         .translate([width / 2, height / 2]);
+  }
+  else if(type=='hammer'){
+    //set the projection we will use
+    this.projection = d3.geoHammer()
+         .scale(165)
+         .translate([width / 2, height / 2])
+         .precision(.1);
+  }
+  
+  //standard path using the projection and the canvas context
+  this.path = d3.geoPath()
+      .projection(this.projection)
+      .pointRadius(3)
+      .context(context); 
+
+  if(objExists(this.voronoi))
+  {
+    this.d3Globe(context);
+  }
+}
+/////////////////////////////////////////////////////////////////////////////////
 voronoiGlobe.prototype.geoVoronoi = function(){
   //points for the voronoi
   var points = { 
@@ -90,13 +107,16 @@ voronoiGlobe.prototype.geoVoronoi = function(){
   this.voronoi = d3.geoVoronoi()(points);
   console.log('voronoi done');
   
+  var G =this;
   this.poly = this.voronoi.polygons().features.map(function(el,i){
-    el.id = i;
     //set all to water
     el.terrain = 'water';
-    return el;
+    //create new tile object
+    return Object.assign(new CPXTile(G,i), el);
   });
 }
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 voronoiGlobe.prototype.generate = function(){
   var G= this;
   this.RNG = new Chance(this._id);
@@ -117,7 +137,6 @@ voronoiGlobe.prototype.generate = function(){
     G.terrainPoly[el.id] = []; 
   });
   
-  
   //return promise - keep things moving
   return new Promise(function(resolve,reject){
     //create voronoi
@@ -131,6 +150,7 @@ voronoiGlobe.prototype.generate = function(){
     G.poly.forEach(function(el) {
       G.terrainPoly[el.terrain].push(el.coordinates);
     });
+    G.terrainArrayIDs();
     
     resolve(true);
   })
@@ -292,20 +312,132 @@ voronoiGlobe.prototype.genContinents = function(){
   }
   
 }
-voronoiGlobe.prototype.pointCalc = function(){
-  this.points = [];
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.resources = function(){
+  //set the RNG 
+  this.RNG = new Chance(this._id+'-'+this.popSeed+'-R');
   
+  //n is the probibility of resources
+  var n = this.RNG.normal({mean: 10, dev: 1.5}),
+  G = this, type='';
+  
+  CPX.data.mapResources = ['Fertile Land', 'Lush Pasture','Good Fishing', 'Medicinal Plants', 
+  'Minerals', 'Timber', 'Magical Materials'];
+  
+  this.poly.forEach(function(tile) {
+    //check resource probability
+    if(G.RNG.bool({likelihood:n})){
+      if(tile.terrain == 'water') {
+        type = G.RNG.pickone(['Good Fishing', 'Medicinal Plants','Minerals','Magical Materials']);
+      }
+      else if(tile.terrain == 'mountain') {
+        type = G.RNG.pickone(['Minerals', 'Timber', 'Magical Materials']);
+      }
+      else if(tile.terrain == 'desert') {
+        type = G.RNG.pickone(['Minerals','Magical Materials']);
+      }
+      else if(tile.terrain == 'swamp') {
+        type = G.RNG.pickone(['Medicinal Plants','Timber','Magical Materials']);
+      }
+      else if(tile.terrain == 'forest') {
+        type = G.RNG.pickone(['Fertile Land','Medicinal Plants','Timber','Minerals','Magical Materials']);
+      }
+      else if(tile.terrain == 'plain') {
+        type = G.RNG.pickone(['Fertile Land', 'Lush Pasture','Minerals','Magical Materials']);
+      }
+      
+      tile.special.push({
+        id: G.RNG.string({length: 27, pool: base62}),
+        name: type,
+        class:['resource'],
+        //size is relative random between 2-5 
+        size: G.RNG.weighted([2,3,4,5],[3,6,2,1])
+      }) 
+    }
+  });
+  
+  delete this.RNG;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.terrainArrayIDs = function(){
+  var G=this, lat=0, 
+  tids = {
+    basic : {},
+    ice : {}
+  };
+  
+  TERRAINS.forEach(function(el) {
+    tids.basic[el.id] = [];
+    tids.ice[el.id] = [];
+  });
+  
+  this.poly.forEach(function(el) {
+    lat = el.properties.site.coordinates[1];
+    //if less than 45 degrees lat, push the poly to basic
+    if(Math.abs(lat)<=45){ tids.basic[el.terrain].push(el.id); }
+    //if less than60 only 50 percent push
+    else if(Math.abs(lat)<=60) { 
+      if (G.RNG.bool()) { tids.basic[el.terrain].push(el.id); }
+      tids.ice[el.terrain].push(el.id);
+    }
+    //push cold tiles
+    else {
+      tids.ice[el.terrain].push(el.id);
+    }
+  });
+  
+  this.terrainIDs = tids;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.pointCalc = function(){
+  var G=this;
+  //setup points
+  this.points = {};
+  HEXSITES.all.forEach(function(el) {
+    G.points[el] = [];
+  });
+  
+  //place markers
+  this.poly.forEach(function(tile) {
+    tile.special.forEach(function(s) {
+      //don't count empires - they are handled differently
+      if(s.class[0]=='empire'){return;}
+      G.points[s.class[0]].push(tile.properties.sitecoordinates);
+    });
+  });
+
   if(objExists(this.opts.mods)){
     for(var x in this.opts.mods){
-      //only display if there is somehting special
-      if(this.opts.mods[x].special.length>0){
-        //multi points are the simple array of points 
-        this.points.push(this.poly[x].properties.sitecoordinates)  
+      //only display if there is a poly
+      if(objExists(this.poly[x])){
+        //only display if there is something special
+        this.opts.mods[x].special.forEach(function(s) {
+          G.points[s.class[0]].push(G.poly[x].properties.sitecoordinates);
+        }); 
       }
     }
   }
 }
 /////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.turn = function(long,val){
+  var G = this, context = canvas.node().getContext("2d");
+  if(long){ 
+    if(val==1 && G.angle.long==360) { G.angle.long = 0; } 
+    if(val==-1 && G.angle.long==0) { G.angle.long = 360; }
+    
+    G.angle.long+= val*30; 
+  }
+  else {
+    G.angle.lat+= val*15; 
+    
+    if(val==1 && G.angle.lat>=90) { G.angle.lat=90; }
+    if(val==-1 && G.angle.lat<=-90) { G.angle.lat=-90; }
+  } 
+  
+  G.projection.rotate([G.angle.long,G.angle.lat]);
+  G.d3Globe(context); 
+}
 /////////////////////////////////////////////////////////////////////////////////
 voronoiGlobe.prototype.animate = function(long,val){
   var G = this, context = canvas.node().getContext("2d");
@@ -336,42 +468,14 @@ voronoiGlobe.prototype.stop = function(){
 }
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
-voronoiGlobe.prototype.d3Display = function(){
+voronoiGlobe.prototype.d3Display = function(status){
   canvas = d3.select("#viewportFrame").append("canvas")
   .attr("width", 1000)
   .attr("height", 800);
   
-  var context = canvas.node().getContext("2d");
-   
-   var width = canvas.node().width,
-       height = canvas.node().height;
+  var context = canvas.node().getContext("2d"), G= this;
   
-  //set the projection we will use
-  this.projection = d3.geoOrthographic()
-      .scale(height / 2.25)
-      .translate([width / 2, height / 2])
-      .clipAngle(90)
-      .precision(.2);
-   
-   //standard path using the projection and the canvas context
-   this.path = d3.geoPath()
-       .projection(this.projection)
-       .pointRadius(4)
-       .context(context);  
-  
-  if(!this.hasOwnProperty("voronoi")){
-    this.generate().then(function(result){
-      delete G.RNG;
-      
-      //sets points if there are mods
-      G.pointCalc();
-
-      G.d3Globe(context); 
-    });  
-  }
-  else{
-    this.d3Globe(context); 
-  }
+  this.setProjection('globe'); 
    
   d3.select('canvas').on("click touch", function(evt){
     G.click(this);
@@ -379,161 +483,60 @@ voronoiGlobe.prototype.d3Display = function(){
   d3.select('canvas').on("mousemove", function(evt){
     
   });
+  
+  //return promise - keep things moving
+  return new Promise(function(resolve,reject){
+    if(!G.hasOwnProperty("voronoi")){
+      G.generate(status).then(function(result){
+        delete G.RNG;
+        
+        //sets points if there are mods
+        G.pointCalc();
+  
+        G.d3Globe(context); 
+      
+        resolve(true);
+      });  
+    }
+    else{
+      G.d3Globe(context); 
+      resolve(true);
+    }
+  })
 }
 /////////////////////////////////////////////////////////////////////////////////
-voronoiGlobe.prototype.threeDisplay = function(){
-  canvas = d3.select("body").append("canvas")
-    .attr("width", window.innerWidth)
-    .attr("height", window.innerHeight);
-   
-  canvas.node().getContext("webgl");
+voronoiGlobe.prototype.d3Globe = function(){
+  var context = canvas.node().getContext("2d");
   
-  renderer = new THREE.WebGLRenderer({canvas: canvas.node(), antialias: true});
-  
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-  
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 5000);
-  camera.position.z = 1000;
-  
-  scene = new THREE.Scene();
-  
-  light = new THREE.HemisphereLight('#ffffff', '#666666', 1.5);
-  light.position.set(0, 1000, 0);
-  scene.add(light);
-  
-  raycaster = new THREE.Raycaster();
+  context.clearRect(0, 0, canvas.node().width, canvas.node().height);
 
-  window.addEventListener('resize', onWindowResize, false);
+  //sphere
+  context.beginPath();
+  this.path({type: "Sphere"});
+  context.lineWidth = 3;
+  context.strokeStyle = "#000";
+  context.stroke();
   
-  if(!this.hasOwnProperty("voronoi")){
-    this.generate().then(function(result){
-      delete G.RNG;
-    
-      G.threeGlobe(); 
-      
-      renderer.render(scene, camera);
-      
-      animate();
-    });  
-  }
-  else{
-    this.threeGlobe(); 
-    renderer.render(scene, camera);
-  }
+  //polygons & borders
+  this.displayTerrain(context,this.path);
   
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
+  //locations
+  this.displayEmpires(context);
   
+  //locations
+  this.displayLocations(context);
+  
+  //display selected polys
+  this.displaySelected(context);
+  
+  //grid 
+  context.beginPath();
+  this.path(d3.geoGraticule()());
+  context.lineWidth = .9;
+  context.strokeStyle = "rgba(119,119,119,.9)";
+  context.stroke(); 
 }
-voronoiGlobe.prototype.threeGlobe = function() {
-  var base = 512, multi =1;
-
-  this.projection = d3.geoEquirectangular()
-    .translate([base*2*multi, base*multi])
-    .scale(326.5);
-
-  /*
-  this.projection = d3.geoOrthographic();
-  
-  .scale(475)
-  .translate([1024 / 2, 512 / 2])
-  .clipAngle(90)
-  .precision(.1);
-  */
-  
-  var segments = 155; // number of vertices. Higher = better mouse accuracy
-
-  /*
-  // Base globe with blue "water"
-  let blueMaterial = new THREE.MeshPhongMaterial({color: '#2B3B59', transparent: true});
-  let sphere = new THREE.SphereGeometry(200, segments, segments);
-  let baseGlobe = new THREE.Mesh(sphere, blueMaterial);
-  baseGlobe.rotation.y = Math.PI;
-  */
-
-  // add base map layer with all countries
-  let worldTexture = this.threeMapTexture();
-  let mapMaterial  = new THREE.MeshPhongMaterial({map: worldTexture, transparent: true});
-  var baseMap = new THREE.Mesh(new THREE.SphereGeometry(200, segments, segments), mapMaterial);
-  baseMap.rotation.y = Math.PI;
-  baseMap.addEventListener('click', onGlobeClick);
-  baseMap.addEventListener('mousemove', onGlobeMousemove);
-  
-  /*
-  // add wireframe layer
-  let wireMaterial  = new THREE.MeshPhongMaterial({wireframe: true, transparent: true});
-  var wireFrame = new THREE.Mesh(new THREE.SphereGeometry(201, segments, segments), wireMaterial);
-  wireFrame.rotation.y = Math.PI;
-  */
-
-  // create a container node and add the two meshes
-  this.root = new THREE.Object3D();
-  this.root.scale.set(2.5, 2.5, 2.5);
-  //this.root.add(baseGlobe);
-  this.root.add(baseMap);
-  //this.root.add(wireFrame);
-  scene.add(this.root);
-  
-  var G=this;
-  function onGlobeMousemove(event) {
-    // Get pointc, convert to latitude/longitude
-    var latlng = getEventCenter.call(this, event);
-  }
-  function onGlobeClick(event) {
-    // Get pointc, convert to latitude/longitude
-    var latlng = getEventCenter.call(this, event),
-    //find the voronoi point, don't forget to flip lat and long
-    vt = G.voronoi.find(latlng[1],latlng[0]),
-    //get the actuall poly data
-    poly = G.poly[vt.index];
-    console.log(poly);
-    //overlay
-    var material = new THREE.MeshPhongMaterial({map: G.threeMapTexture(poly), transparent: true});
-    
-    if (!G.overlay) {
-      G.overlay = new THREE.Mesh(new THREE.SphereGeometry(201, 40, 40), material);
-      G.overlay.rotation.y = Math.PI;
-      G.root.add(G.overlay);
-    } else {
-      G.overlay.material = material;
-    }
-    
-  }
-  
-  setEvents(camera, [baseMap], 'click');
-  setEvents(camera, [baseMap], 'mousemove', 10);
-}
-voronoiGlobe.prototype.threeMapTexture = function(poly) {
-  var base = 1024,
-    texture, 
-    canvas = d3.select("body").append("canvas")
-           .style("display", "none")
-           .attr("width", base*2+"px")
-           .attr("height", base+"px"), 
-    context = canvas.node().getContext("2d"),
-    path = d3.geoPath()
-           .projection(this.projection)
-           .context(context);
-
-  if(typeof poly === 'undefined'){
-    console.log('building texture');
-    this.displayTerrain(context,path);
-  }
-  else {
-    this.displayTile(context,path,poly)
-  }
-  
-  texture = new THREE.Texture(canvas.node());
-  texture.needsUpdate = true;
-
-  canvas.remove();
-
-  return texture;
-}
+/////////////////////////////////////////////////////////////////////////////////
 voronoiGlobe.prototype.click = function(evt){
   var G = this;
   var pos = d3.mouse(evt);
@@ -541,7 +544,8 @@ voronoiGlobe.prototype.click = function(evt){
   var cell = this.voronoi.find(latlong[0],latlong[1]);
   var poly = this.poly[cell.index];
   
-  VU.setTile(poly);
+  console.log(poly);
+  VU.setTile(cell.index);
   G.selected = [poly.coordinates];
   
   G.d3Globe(canvas.node().getContext("2d"));
@@ -573,14 +577,31 @@ voronoiGlobe.prototype.displaySelected = function(context) {
   context.stroke();
 }
 voronoiGlobe.prototype.displayLocations = function(context) {
-  if(this.points.length==0) { return; }
-  
+  //only show what is desired
+  if(this.points[this.show].length==0) {return;}
   //points
   context.beginPath();
-  this.path({type: "MultiPoint", coordinates:this.points});
-  context.fillStyle = "#000";
+  this.path({type: "MultiPoint", coordinates:this.points[this.show]});
+  context.fillStyle = HEXSITES[this.show].fill;
   context.fill(); 
+  context.lineWidth = 0.6;
+  context.strokeStyle = HEXSITES[this.show].color;
   context.stroke();
+}
+voronoiGlobe.prototype.displayEmpires = function(context) {
+  if(!objExists(this.empires)) {return;}
+  
+  var E={};
+  for(var x in this.empires){
+    E = this.empires[x];
+    //polygons
+    context.beginPath();
+    this.path({type: "MultiPolygon",coordinates:E.tileData()});
+    //borders
+    context.lineWidth = 3;
+    context.strokeStyle = E.color;
+    context.stroke();
+  }
 }
 voronoiGlobe.prototype.displayTerrain = function(context,path) {
   var C = {
@@ -607,196 +628,322 @@ voronoiGlobe.prototype.displayTerrain = function(context,path) {
     context.stroke();
   }
 }
-voronoiGlobe.prototype.d3Globe = function(){
-  var context = canvas.node().getContext("2d");
-  
-  context.clearRect(0, 0, canvas.node().width, canvas.node().height);
-
-  //sphere
-  context.beginPath();
-  this.path({type: "Sphere"});
-  context.lineWidth = 3;
-  context.strokeStyle = "#000";
-  context.stroke();
-  
-  //polygons & borders
-  this.displayTerrain(context,this.path);
-  
-  //locations
-  this.displayLocations(context);
-  
-  //display selected polys
-  this.displaySelected(context);
-  
-  //grid 
-  context.beginPath();
-  this.path(d3.geoGraticule()());
-  context.lineWidth = .9;
-  context.strokeStyle = "rgba(119,119,119,.9)";
-  context.stroke(); 
-}
-
-function voronoiPlane (){
-  this.canvas = d3.select("canvas").on("touchmove mousemove", this.moved).node();
-  var context = this.canvas.getContext("2d");
-  
-  var width = this.canvas.width,
-      height = this.canvas.height;
-  
-  this.sites = d3.range(100).map(function() {
-    return [ width * Math.random(), height * Math.random() ] 
-  })
-  
-  this.voronoi = d3.voronoi()
-  .extent([[-1, -1], [width + 1, height + 1]]);
-  
-}
-voronoiPlane.prototype.display = function (){
-  var context = this.canvas.getContext("2d"),
-      diagram = this.voronoi(this.sites),
-      links = diagram.links(),
-      polygons = diagram.polygons();
-
-  context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-  context.beginPath();
-  for (var i = 0, n = polygons.length; i < n; ++i) drawCell(polygons[i]);
-  context.strokeStyle = "#000";
-  context.stroke();
-
-  context.beginPath();
-  for (var i = 0, n = links.length; i < n; ++i) drawLink(links[i]);
-  context.strokeStyle = "rgba(0,0,0,0.2)";
-  context.stroke();
-
-  context.beginPath();
-  for (var i = 0, n = this.sites.length; i < n; ++i) drawSite(this.sites[i]);
-  context.fillStyle = "#000";
-  context.fill();
-  context.strokeStyle = "#fff";
-  context.stroke();
-  
-  function drawSite(site) {
-    context.moveTo(site[0] + 7, site[1]);
-    context.arc(site[0], site[1], 7, 0, 2 * Math.PI, false);
-  }
-  
-  function drawLink(link) {
-    context.moveTo(link.source[0], link.source[1]);
-    context.lineTo(link.target[0], link.target[1]);
-  }
-  
-  function drawCell(cell) {
-    if (!cell) return false;
-    context.moveTo(cell[0][0], cell[0][1]);
-    for (var j = 1, m = cell.length; j < m; ++j) {
-      context.lineTo(cell[j][0], cell[j][1]);
-    }
-    context.closePath();
-    return true;
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+var ages = {
+  '1' : {
+    age:1,
+    events:['ruin','conversion','schism','retract','growth','expansion'],
+    eventweight: [10,20,10,20,15,5],
+    addempires : [3,8]
   }
 }
-voronoiPlane.prototype.moved = function() {
-  var pos = d3.mouse(this);
-  //redraw();
-}
-
-var G = {};
-
-function debounce(func, wait, immediate) {
-  var timeout;
-  return function() {
-    var context = this, args = arguments;
-    var later = function() {
-      timeout = null;
-      if (!immediate) {
-        func.apply(context, args);
-      }
-    };
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) {
-      func.apply(context, args);
-    }
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.agePreModern = function() {
+  var f='', n=0, 
+  age = {
+    n:3,
+    events: ['ruin','conversion','schism','retract','growth','expansion'],
+    eweight : [10,20,10,20,15,5]
   };
-}
-
-function getPoint(event) {
-
-  // Get the vertices
-  let a = this.geometry.vertices[event.face.a];
-  let b = this.geometry.vertices[event.face.b];
-  let c = this.geometry.vertices[event.face.c];
-
-  // Averge them together
-  let point = {
-    x: (a.x + b.x + c.x) / 3,
-    y: (a.y + b.y + c.y) / 3,
-    z: (a.z + b.z + c.z) / 3
-  };
-
-  return point;
-}
-
-function getEventCenter(event, radius) {
-  radius = radius || 200;
-
-  var point = getPoint.call(this, event);
-
-  var latRads = Math.acos(point.y / radius);
-  var lngRads = Math.atan2(point.z, point.x);
-  var lat = (Math.PI / 2 - latRads) * (180 / Math.PI);
-  var lng = (Math.PI - lngRads) * (180 / Math.PI);
-
-  return [lat, lng - 180];
-}
-
-function setEvents(camera, items, type, wait) {
-
-  let listener = function(event) {
-
-    let mouse = {
-      x: ((event.clientX - 1) / window.innerWidth ) * 2 - 1,
-      y: -((event.clientY - 1) / window.innerHeight) * 2 + 1
-    };
-
-    let vector = new THREE.Vector3();
-    vector.set(mouse.x, mouse.y, 0.5);
-    vector.unproject(camera);
-
-    raycaster.ray.set(camera.position, vector.sub(camera.position).normalize());
-
-    let target = raycaster.intersectObjects(items);
-
-    if (target.length) {
-      target[0].type = type;
-      target[0].object.dispatchEvent(target[0]);
+  //run previous ages
+  this.agePreAntiquity();
+  this.ageAntiquity();
+  this.ageSail();
+  //set the RNG for the age
+  this.RNG = new Chance(this._id+'-'+this.popSeed+'-'+age.n);
+  
+  //cycle through empires t determine if still remain
+  CPX.empireEvents.start(this,age);
+  //add new empires
+  this.addEmpires(this.RNG.natural({min:3,max:8}),age.n);
+  
+  //expand empires
+  for(var x in this.empires){
+    if(['ruin','conversion'].findOne(this.empires[x].events)){continue;}
+    
+    //expand
+    n = this.RNG.natural({min:2,max:4});
+    //20% chance of massive expansion
+    if(this.RNG.bool({likelihood:20})){ 
+      n = n * this.RNG.weighted([2,3,4],[6,3,1]); 
     }
+    //expand
+    this.popExpand(this.empires[x],n,age.n);
+  }
 
+  delete this.RNG;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.ageSail = function() {
+  var f='', n=0,
+  age = {
+    n:2,
+    events: ['ruin','conversion','schism','retract','growth','expansion'],
+    eweight : [40,10,10,30,5,5]
   };
+  //run previous ages
+  this.agePreAntiquity();
+  this.ageAntiquity();
+  //set the RNG for the age
+  this.RNG = new Chance(this._id+'-'+this.popSeed+'-'+age.n);
+  
+  //cycle through empires t determine if still remain
+  CPX.empireEvents.start(this,age);
+  //add new empires
+  this.addEmpires(this.RNG.natural({min:3,max:8}),age.n);
+  
+  //expand empires
+  for(var x in this.empires){
+    if(['ruin','conversion'].findOne(this.empires[x].events)){continue;}
+    //expand
+    this.popExpand(this.empires[x],this.RNG.natural({min:2,max:4}),age.n);
+  }
 
-  if (!wait) {
-    document.addEventListener(type, listener, false);
-  } else {
-    document.addEventListener(type, debounce(listener, wait), false);
+  delete this.RNG;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.ageAntiquity = function() {
+  var f='', n=0, 
+  age = {
+    n:1,
+    events: ['ruin','conversion','schism','retract','growth','expansion'],
+    eweight : [40,10,15,10,20,5]
+  };
+  //run pre-Antiquity
+  this.agePreAntiquity();
+  //set the RNG for the age
+  this.RNG = new Chance(this._id+'-'+this.popSeed+'-'+age.n);
+
+  //cycle through empires t determine if still remain
+  CPX.empireEvents.start(this,age);
+  //add new empires
+  this.addEmpires(this.RNG.natural({min:3,max:8}),age.n);
+  
+  //expand empires
+  for(var x in this.empires){
+    if(['ruin','conversion'].findOne(this.empires[x].events)){continue;}
+    //expand
+    this.popExpand(this.empires[x],this.RNG.natural({min:2,max:4}),age.n);
+  }
+
+  delete this.RNG;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.agePreAntiquity = function(){
+  this.RNG = new Chance(this._id+'-'+this.popSeed+'-0');
+  
+  var G=this, age = 0, n=-1, ppl={};
+  
+  //peoples
+  n = this.RNG.natural({min:12,max:28});
+  this.addPeople(n);
+  
+  for(var x in this.peoples){
+    //for each people - expand
+    this.popExpand(this.peoples[x],this.RNG.natural({min:2,max:5}),age);
+  }
+  
+  //add new empires
+  this.addEmpires(this.RNG.natural({min:3,max:8}),age);
+  
+  //expand empires
+  for(var x in this.empires){
+    if(['ruin','conversion'].findOne(this.empires[x].events)){continue;}
+    //expand
+    this.popExpand(this.empires[x],this.RNG.natural({min:2,max:4}),age);
+  }
+  
+  delete this.RNG;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.likelyTerrain = function(tags){
+  var tA = this.terrainIDs, pa=[]; 
+
+  if(tags.includes('ice')){
+    pa = [].concat(tA.ice.plain,tA.ice.forest,tA.ice.desert,tA.ice.swamp,tA.ice.hill);
+    if(tags.findOne(['mountain','earth','air','flight'])) {
+      pa = pa.concat(tA.ice.mountain);
+    }
+    
+    if(tags.includes('water')) {
+      if(tags.length==1) {pa = tA.ice.water;}
+      else { pa = pa.concat(tA.ice.water); }
+    }
+     
+  }
+  else {
+    pa = [].concat(tA.basic.plain,tA.basic.forest,tA.basic.hill);
+    if(tags.findOne(['mountain','earth','air','flight'])) {
+      pa = pa.concat(tA.basic.mountain);
+    }
+    
+    if(tags.includes('water')) {
+      if (tags.length==1) { pa = tA.basic.water; }
+      else { pa = pa.concat(tA.basic.water); }
+    }
+  }
+  
+  return pa;
+}
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.addPeople = function(n) {
+  var pplid ='', lT = [];
+  for(var i=0;i<n;i++){
+    //people id 
+    pplid = this.RNG.string({length: 27, pool: base62});
+    //make people
+    this.peoples[pplid] = new CPXPeople(pplid);
+    //likely terrain
+    lT = this.likelyTerrain(this.peoples[pplid].special);
+    //pick
+    pid = this.RNG.pickone(lT);
+    //add tile
+    this.peoples[pplid].addTile(this.poly[pid]);
   }
 }
-/*
-function render(){
-  renderer.render(scene, camera);
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.addEmpires = function(n,age) {
+  var allpeople = [];
+  for(var x in this.peoples){ allpeople.push(x); }
+  
+  var eid = '', pplid='', tile={}, m=-1; 
+  for(var i=0;i<n;i++){
+    //empire id
+    eid = this.RNG.string({length: 27, pool: base62});
+    //track empires
+    this.empires[eid] = new CPXEmpire(eid,age);
+    //people
+    pplid = this.RNG.pickone(allpeople);
+    //pick empire
+    tile = this.RNG.pickone(this.peoples[pplid].tiles);
+    //capital
+    this.empires[eid].capital = tile;
+    //add tile to empire
+    this.empires[eid].addTile(tile);
+  }
 }
-
-function animate() {
-  //G.root.rotation.y += G.rotate;
-  G.root.rotation.x += G.rotate;
-  requestAnimationFrame(animate);
-  render();
+/////////////////////////////////////////////////////////////////////////////////
+voronoiGlobe.prototype.popExpand = function(obj,n,age) {
+  var tags = [];
+  //consolidate tags
+  if(objExists(obj.peoples)){
+    obj.peoples.forEach(function(el) {
+      tags = tags.concat(el.special);
+    });
+  }
+  else { tags = obj.special; }
+  //find likely terrain
+  var lT = this.likelyTerrain(tags);
+  
+  var pN = [], G=this, neighbours=[], next ={};
+  //multiply by people factor
+  n = n * obj.expandMultiply();
+  //loop through n expansions
+  for(var i=0;i<n;i++){
+    //loop through tiles 
+    obj.tiles.forEach(function(tile) {
+      neighbours = tile.properties.neighbours;
+      neighbours.forEach(function(nid) {
+        if(lT.includes(nid)) { 
+          if(!obj.tileIDs().includes(nid)) { pN.push(nid); }
+        }
+      });
+    });
+    //ran into empty array errors
+    if(pN.length==0) { pN = [].concat(neighbours); }
+    pN = pN.unique();
+  
+    next = this.poly[this.RNG.pickone(pN)];
+    
+    //add tile to people/empire
+    obj.addTile(next);  
+  }
 }
-
-function startThree(){
-  addG(4000);
-  G.threeDisplay();
+/////////////////////////////////////////////////////////////////////////////////
+//populate the globe based on the given age and then display
+voronoiGlobe.prototype.populate = function(age) {
+  this.popSeed = CPXC.string({length: 7, pool: base62});
+  this.peoples = {};
+  this.empires = {};
+  
+  //wipe the slate
+  this.poly.forEach(function(tile) {
+    tile.special.length = 0;
+  });
+  
+  this.resources();
+  this['age'+age]();
+  
+  this.pointCalc();
+  this.d3Globe();
 }
-*/
+voronoiGlobe.prototype.peopleList = function (){
+  var list = [], info='', ppl={};
+  for(var x in this.peoples){
+    ppl = this.peoples[x];
+    info = ppl.people + '['+ppl.rarity+']'+' Tags: '+ppl.special.join(', ');
+    list.push(info);
+  }
+  return list;
+}
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+//basic tile object
+function CPXTile (parent,id){
+  this.name='';
+  this.notes='';
+  this.parent = parent;
+  this.id = id;
+  this.special = [];
+}
+CPXTile.prototype.save = function(){
+  var doc = {
+    id : this.id,
+    name: this.name,
+    notes: this.notes,
+    special:[]
+  }
+  this.special.forEach(function(s) {
+    if(['people','empire'].includes(s.class[0])){
+      doc.special.push({class:s.class,seed:s.seed});
+    }
+    else {doc.special.push(s);}
+  });
+  return doc;
+}
+CPXTile.prototype.peoples = function(){
+  var a=[];
+  this.special.forEach(function(s) {
+    if(s.class[0]=='people'){a.push(s);}
+  });
+  return a;
+}
+//add special - check if they exist, add if they dont
+CPXTile.prototype.addSpecial = function(obj){
+  //make sure doesn't exist already
+  if(this.specialIDs().includes(obj.id)){ return; }
+  //if the object is an empire, remove other empires
+  if(obj.class[0]=='empire'){
+    this.removeEmpires();
+  }
+  //add if it doesn't exist
+  this.special.push(obj); 
+}
+CPXTile.prototype.removeEmpires = function(){
+  for(var i=this.special.length-1;i>-1;i--){
+    if(this.special[i].class[0]=='empire'){
+      this.special.splice(i,1);
+    }
+  }
+}
+//remove objects 
+CPXTile.prototype.removeSpecial = function(obj){
+  if(this.specialIDs().includes(obj.id)){ 
+    this.special.splice(this.specialIDs().indexOf(obj.id),1);
+  }
+}
+CPXTile.prototype.specialIDs = function(){
+  return this.special.map(function(s){ return s.id; });
+}
 

@@ -64,6 +64,20 @@
 'X-ray Vision'
 
 */
+
+const HEXSITES = {
+  all: ['empire','people','town','stronghold','lair','natural','ruin','resource','other'],
+  empire:{class:['empire'],color:'white',fill:''},
+  people:{class:['people'],color:'white',fill:'white'},
+  town:{class:['town'],color:'black',fill:'black'},
+  stronghold:{class:['stronghold'],color:'green',fill:'green'},
+  ruin:{class:['ruin'],color:'grey',fill:'grey'},
+  natural:{class:['natural'],color:'blue',fill:'blue'},
+  resource:{class:['resource'],color:'yellow',fill:'yellow'},
+  lair:{class:['lair'],color:'red',fill:'red'},
+  other:{class:['ruin'],color:'orange',fill:'orange'}
+} 
+
 CPX.data.quickpowers = {
   fly : function (r) { return {id:'flight',rank:r} },
   curse : function (r) { return {id:'curse',rank:r} },
@@ -508,6 +522,10 @@ CPX.powerText = function(input){
   return txt;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+CPX.gen.rarity = function (RNG){
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
+  return RNG.weighted(['common','uncommon','rare','legendary','epic'],[60,30,7,0.8,0.2])
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 CPX.gen.actor = function (type){
   return CPXC.pickone(CPX.data.actorCommon);
@@ -525,7 +543,8 @@ CPX.gen.aspect = function (n){
   return R;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-CPX.gen.element = function (n){
+CPX.gen.element = function (n,RNG){
+  RNG = typeof RNG === "undefined" ? CPXC : RNG;
   var R = [], pick='';
   //until we get enough loop
   while (R.length<n){

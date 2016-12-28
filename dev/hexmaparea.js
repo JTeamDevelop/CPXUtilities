@@ -2,17 +2,6 @@
  Last change: add ncity and nruin to generation
 */
 
-const HEXSITES = {
-  all: ['town','stronghold','lair','natural','ruin','resource','other'],
-  town:{class:['town'],color:'black'},
-  stronghold:{class:['stronghold'],color:'green'},
-  ruin:{class:['ruin'],color:'grey'},
-  natural:{class:['natural'],color:'blue'},
-  resource:{class:['resource'],color:'yellow'},
-  lair:{class:['lair'],color:'red'},
-  other:{class:['ruin'],color:'orange'}
-} 
-
 CPX.rectHexArea = function (opts) {
   
   var map = {

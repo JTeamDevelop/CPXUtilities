@@ -128,6 +128,16 @@ Array.prototype.findOne = function (haystack) {
     });
 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//find the similar values in arrays
+Array.prototype.diff = function(arr2) {
+    var ret = [];
+    for(var i in this) {   
+        if(arr2.indexOf( this[i] ) > -1){
+            ret.push( this[i] );
+        }
+    }
+    return ret;
+};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //generic object creator - takes options (object) and extras (object array)
 // extras = {key,value}
